@@ -786,7 +786,8 @@ async function callClaude(messages) {
 
   let res;
   try {
-    res = await fetch('https://api.anthropic.com/v1/messages', {
+    const PROXY = 'https://clinicalmind-ai.samitcheema.workers.dev/';
+    res = await fetch(PROXY, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
