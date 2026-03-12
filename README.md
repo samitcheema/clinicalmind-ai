@@ -141,6 +141,16 @@ clinicalmind-ai/
 
 ---
 
+## Live Demo
+
+A browser-based demo is hosted on GitHub Pages at:
+**`https://samitcheema.github.io/clinicalmind-ai/`**
+
+The demo runs entirely in the browser — no backend required. It calls the Anthropic API directly using your own API key (stored locally, never leaves your browser). It implements all 7 MCP tools as JavaScript functions against the same mock dataset.
+
+
+---
+
 ## Setup
 
 **Prerequisites:** Python 3.10+, Claude Desktop or any MCP-compatible client
