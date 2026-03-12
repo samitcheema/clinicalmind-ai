@@ -784,25 +784,32 @@ async function callClaude(messages) {
   const key = localStorage.getItem('cm_api_key');
   if (!key) throw new Error('No API key — click Connect above');
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'content-type': 'application/json',
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-allow-browser': 'true'
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1024,
-      system: SYSTEM,
-      tools: TOOLS,
-      messages
-    })
-  });
+  let res;
+  try {
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-allow-browser': 'true'
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1024,
+        system: SYSTEM,
+        tools: TOOLS,
+        messages
+      })
+    });
+  } catch (e) {
+    console.error('Fetch error:', e);
+    throw new Error(`Network error — check the browser console (Cmd+Opt+I) for details. Raw: ${e.message}`);
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
+    console.error('API error:', res.status, err);
     throw new Error(err?.error?.message || `HTTP ${res.status}`);
   }
   return res.json();
