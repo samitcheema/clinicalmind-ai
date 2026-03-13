@@ -235,25 +235,32 @@ _ALL_TABLES = _PRIVATE_TABLES + ["clinic_stats"]
 def _rls_statements() -> list[str]:
     stmts: list[str] = []
 
-    # Enable RLS on every table
+    # Enable RLS on every table (idempotent)
     for t in _ALL_TABLES:
         stmts.append(f"ALTER TABLE {t} ENABLE ROW LEVEL SECURITY")
 
     # Private tables: service_role gets full access, anon gets nothing
+    # Uses DO block to skip gracefully if policy already exists (works on PG < 15)
     for t in _PRIVATE_TABLES:
         stmts.append(
-            f'CREATE POLICY IF NOT EXISTS "service_role_all" ON {t} '
-            f"FOR ALL TO service_role USING (true) WITH CHECK (true)"
+            "DO $$ BEGIN "
+            f'CREATE POLICY "service_role_all" ON {t} '
+            f"FOR ALL TO service_role USING (true) WITH CHECK (true); "
+            "EXCEPTION WHEN duplicate_object THEN NULL; END $$"
         )
 
     # clinic_stats: anon can SELECT (for website dashboard), service_role full access
     stmts.append(
-        'CREATE POLICY IF NOT EXISTS "anon_select" ON clinic_stats '
-        "FOR SELECT TO anon USING (true)"
+        "DO $$ BEGIN "
+        'CREATE POLICY "anon_select" ON clinic_stats '
+        "FOR SELECT TO anon USING (true); "
+        "EXCEPTION WHEN duplicate_object THEN NULL; END $$"
     )
     stmts.append(
-        'CREATE POLICY IF NOT EXISTS "service_role_all" ON clinic_stats '
-        "FOR ALL TO service_role USING (true) WITH CHECK (true)"
+        "DO $$ BEGIN "
+        'CREATE POLICY "service_role_all" ON clinic_stats '
+        "FOR ALL TO service_role USING (true) WITH CHECK (true); "
+        "EXCEPTION WHEN duplicate_object THEN NULL; END $$"
     )
 
     return stmts

@@ -31,7 +31,7 @@ from fastmcp import FastMCP
 # to query live Supabase data. Falls back to mock data when not set.
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
 
 if os.environ.get("USE_SUPABASE", "").lower() == "true":
     from adapter.sql_adapter import (

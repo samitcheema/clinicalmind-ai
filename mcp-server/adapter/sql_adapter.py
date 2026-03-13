@@ -15,10 +15,11 @@ import os
 import json
 from functools import lru_cache
 
+import os as _os
 from dotenv import load_dotenv
 from supabase import create_client, Client
 
-load_dotenv()
+load_dotenv(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "..", ".env"))
 
 KPI_NAMES  = ["bha", "sra", "aims", "whodas", "phq9", "beh_tp", "beh_csp"]
 KPI_TARGET = 75
