@@ -230,9 +230,7 @@ def seed(client: Client, patients: list[dict]) -> None:
             "patient_id":     p["patient_id"],
             "admit_date":     _to_str(e["admit_date"]),
             "discharge_date": _to_str(e.get("discharge_date")),
-            "encounter_type": e["encounter_type"],
-            "pes_flag":       bool(e["pes_flag"]),
-            "cis_flag":       bool(e["cis_flag"]),
+            "encounter_type": e["encounter_type"]
         }
         for p in patients
         for e in p["encounters"]
