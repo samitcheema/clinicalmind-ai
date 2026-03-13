@@ -349,8 +349,6 @@ function transformPatient(row) {
   };
 }
 
-const WORKER_TOKEN = 'clinicalmind2025';
-
 async function loadData() {
   const select = [
     '*',
@@ -365,9 +363,8 @@ async function loadData() {
 
   const res = await fetch(
     `${PROXY}supabase/patients?select=${select}&order=patient_id`,
-    { headers: { Accept: 'application/json', 'x-worker-token': WORKER_TOKEN } }
+    { headers: { Accept: 'application/json' } }
   );
-  if (res.status === 401) throw new Error('Data access error — check configuration');
   if (!res.ok) throw new Error(`Supabase proxy: HTTP ${res.status}`);
   const rows = await res.json();
   PATIENTS = rows.map(transformPatient);

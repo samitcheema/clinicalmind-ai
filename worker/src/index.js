@@ -1,7 +1,7 @@
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'content-type, x-api-key, anthropic-version, anthropic-dangerous-allow-browser, x-worker-token',
+  'Access-Control-Allow-Headers': 'content-type, x-api-key, anthropic-version, anthropic-dangerous-allow-browser',
   'Access-Control-Max-Age': '86400',
 };
 
@@ -20,15 +20,6 @@ export default {
 
     // Supabase REST proxy: GET /supabase/<table>?<postgrest-params>
     if (url.pathname.startsWith('/supabase/')) {
-      // Auth: require X-Worker-Token header
-      const token = request.headers.get('x-worker-token') || '';
-      if (!env.WORKER_TOKEN || token !== env.WORKER_TOKEN) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          status: 401,
-          headers: { ...CORS_HEADERS, 'content-type': 'application/json' },
-        });
-      }
-
       const table = url.pathname.slice('/supabase/'.length);
       const supaUrl = `${env.SUPABASE_URL}/rest/v1/${table}${url.search}`;
       const upstream = await fetch(supaUrl, {
