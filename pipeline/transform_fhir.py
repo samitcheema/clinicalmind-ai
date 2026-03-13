@@ -134,12 +134,40 @@ def _parse_fhir(bundle: dict) -> dict:
     kpi_pct   = _ext_value(exts, "kpiCompliance") or 0
 
     # Practitioner ─────────────────────────────────────────────────────────────
+    # Try extension first (ClinicalMind-generated bundles); fall back to any
+    # Practitioner resource in the bundle (Synthea / real EHR output).
     prac = next(
         (p for p in by_type.get("Practitioner", []) if p.get("id") == prov_id),
-        {},
+        None,
     )
-    prov_name = prac.get("name", [{}])[0].get("text", prov_id)
+    if prac is None:
+        prac = by_type.get("Practitioner", [{}])[0] if by_type.get("Practitioner") else {}
+    if not prov_id:
+        prov_id = prac.get("id", "")
+    prov_name = (prac.get("name", [{}])[0].get("text")
+                 or " ".join(prac.get("name", [{}])[0].get("given", []) +
+                             [prac.get("name", [{}])[0].get("family", "")])
+                 or prov_id)
     prov_team = _ext_value(prac.get("extension", []), "team") or ""
+
+    # Encounter-based provider fallback (Synthea puts practitioners in a
+    # separate file; extract NPI + display from the first encounter participant)
+    if not prov_id:
+        for enc_res in by_type.get("Encounter", []):
+            for part in enc_res.get("participant", []):
+                indiv = part.get("individual", {})
+                ref   = indiv.get("reference", "")
+                disp  = indiv.get("display", "")
+                if "npi|" in ref:
+                    prov_id   = "npi-" + ref.split("npi|")[-1]
+                    prov_name = prov_name or disp or prov_id
+                    break
+                elif disp:
+                    prov_id   = disp.replace(" ", "_")[:30]
+                    prov_name = prov_name or disp
+                    break
+            if prov_id:
+                break
 
     # Condition ────────────────────────────────────────────────────────────────
     cond   = by_type.get("Condition", [{}])[0]

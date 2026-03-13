@@ -153,12 +153,21 @@ def run(
     # ── Build all row lists ────────────────────────────────────────────────────
 
     try:
-        # providers
-        prov_rows = [
-            {"provider_id": p["id"], "name": p["name"], "team": p["team"]}
+        # providers — seed hardcoded list, then add any patient-derived providers
+        # (e.g. NPI-based IDs extracted from Synthea Encounter participants)
+        prov_map = {
+            p["id"]: {"provider_id": p["id"], "name": p["name"], "team": p["team"]}
             for p in PROVIDERS
-        ]
-        _upsert("providers", prov_rows, "provider_id")
+        }
+        for p in patients:
+            pid = p.get("provider_id", "")
+            if pid and pid not in prov_map:
+                prov_map[pid] = {
+                    "provider_id": pid,
+                    "name":        p.get("provider_name", pid),
+                    "team":        p.get("team", ""),
+                }
+        _upsert("providers", list(prov_map.values()), "provider_id")
 
         # patients
         _upsert("patients", [_patient_row(p) for p in patients], "patient_id")
