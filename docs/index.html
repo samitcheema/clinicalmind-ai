@@ -3,247 +3,176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClinicalMind AI — Demo</title>
+  <title>ClinicalMind AI</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { height: 100%; overflow: hidden; }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #f0f4f8;
-      color: #1e293b;
-      display: flex;
-      flex-direction: column;
-    }
+    body { font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif; background: #f0f4f8; color: #1e293b; display: flex; flex-direction: column; }
 
     /* ── Header ── */
-    header {
-      background: #1e3a8a;
-      color: white;
-      padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-shrink: 0;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    }
-    .logo {
-      width: 36px; height: 36px;
-      background: #3b82f6;
-      border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px; flex-shrink: 0;
-    }
-    header h1 { font-size: 17px; font-weight: 600; }
+    header { background: #1e3a8a; color: white; padding: 12px 24px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.25); }
+    .logo { width: 34px; height: 34px; background: #3b82f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 17px; flex-shrink: 0; }
+    header h1 { font-size: 16px; font-weight: 600; }
     header .sub { font-size: 11px; opacity: 0.65; margin-top: 1px; }
-    header .badge {
-      margin-left: auto;
-      background: rgba(255,255,255,0.15);
-      padding: 4px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      white-space: nowrap;
-    }
+    .badge { margin-left: auto; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 12px; font-size: 11px; white-space: nowrap; }
+    .badge.loading { opacity: 0.6; }
+    .badge.error   { background: rgba(239,68,68,0.25); }
+    .badge-retry   { margin-left: 6px; cursor: pointer; text-decoration: underline; opacity: 0.8; }
+    .badge-retry:hover { opacity: 1; }
 
-    /* ── API key bar ── */
-    #api-setup {
-      background: #fffbeb;
-      border-bottom: 1px solid #fde68a;
-      padding: 10px 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
+    /* ── API setup bar ── */
+    #api-setup { background: #fffbeb; border-bottom: 1px solid #fde68a; padding: 9px 24px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
     #api-setup.hidden { display: none; }
     #api-setup label { font-size: 13px; font-weight: 500; color: #92400e; white-space: nowrap; }
-    #api-setup .field-group { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px; }
-    #api-key-input, #worker-token-input {
-      flex: 1; min-width: 160px; max-width: 320px;
-      padding: 6px 12px;
-      border: 1px solid #fcd34d;
-      border-radius: 6px;
-      font-size: 13px; font-family: monospace;
-      background: white;
-    }
+    #api-setup .field-group { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 180px; }
+    #api-key-input, #worker-token-input { flex: 1; min-width: 140px; max-width: 300px; padding: 5px 10px; border: 1px solid #fcd34d; border-radius: 6px; font-size: 13px; font-family: monospace; background: white; }
     #api-key-input:focus, #worker-token-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.2); }
-    #save-key-btn {
-      padding: 6px 14px;
-      background: #f59e0b; color: white;
-      border: none; border-radius: 6px;
-      font-size: 13px; font-weight: 500; cursor: pointer;
-    }
+    #save-key-btn { padding: 5px 14px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
     #save-key-btn:hover { background: #d97706; }
     .api-note { font-size: 11px; color: #92400e; }
 
-    /* ── Page layout ── */
-    #page { flex: 1; display: flex; justify-content: center; overflow: hidden; }
-    #main {
-      display: flex; flex-direction: column;
-      width: 100%; max-width: 840px;
-      overflow: hidden;
-    }
+    /* ── Tab nav ── */
+    #tab-nav { background: white; border-bottom: 2px solid #e2e8f0; padding: 0 20px; display: flex; flex-shrink: 0; }
+    .tab { padding: 10px 16px; border: none; background: none; font-size: 13px; font-weight: 500; color: #64748b; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: color .15s, border-color .15s; }
+    .tab:hover { color: #1e40af; }
+    .tab.active { color: #1e40af; border-bottom-color: #1e40af; font-weight: 600; }
 
-    /* ── Messages ── */
-    #messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 20px 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    /* ── Content / panes ── */
+    #content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
+    #dashboard-pane { overflow-y: auto; }
 
-    /* Welcome */
-    #welcome {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      flex: 1; padding: 40px 20px; text-align: center;
-    }
+    /* ── Dashboard ── */
+    .dash-inner { padding: 18px 22px 24px; max-width: 1140px; margin: 0 auto; width: 100%; }
+
+    .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+    .stat-card { background: white; border-radius: 10px; padding: 16px 18px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); border-top: 3px solid #e2e8f0; }
+    .stat-card.blue  { border-top-color: #3b82f6; }
+    .stat-card.red   { border-top-color: #ef4444; }
+    .stat-card.amber { border-top-color: #f59e0b; }
+    .stat-card.green { border-top-color: #22c55e; }
+    .sc-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; margin-bottom: 8px; }
+    .sc-value { font-size: 30px; font-weight: 700; line-height: 1; margin-bottom: 4px; color: #1e293b; }
+    .sc-value.red   { color: #dc2626; }
+    .sc-value.amber { color: #d97706; }
+    .sc-value.green { color: #16a34a; }
+    .sc-sub { font-size: 11px; color: #94a3b8; }
+
+    .mid-row { display: grid; grid-template-columns: 1fr 260px; gap: 12px; margin-bottom: 14px; }
+
+    .panel { background: white; border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.07); }
+    .panel-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #94a3b8; margin-bottom: 16px; }
+
+    /* KPI bars */
+    .kpi-row { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+    .kpi-row:last-child { margin-bottom: 0; }
+    .kpi-name { font-size: 11px; font-weight: 700; color: #475569; width: 52px; flex-shrink: 0; }
+    .kpi-bar-outer { flex: 1; position: relative; }
+    .kpi-bar-bg { height: 8px; background: #f1f5f9; border-radius: 4px; overflow: hidden; }
+    .kpi-bar-fill { height: 100%; border-radius: 4px; transition: width .5s ease; }
+    .kpi-bar-fill.meets { background: #22c55e; }
+    .kpi-bar-fill.below { background: #f59e0b; }
+    .kpi-target-tick { position: absolute; left: 75%; top: -4px; width: 2px; height: 16px; background: #94a3b8; border-radius: 1px; transform: translateX(-50%); }
+    .kpi-pct { font-size: 12px; font-weight: 700; width: 32px; text-align: right; flex-shrink: 0; }
+    .kpi-pct.meets { color: #16a34a; }
+    .kpi-pct.below { color: #d97706; }
+
+    /* Risk breakdown */
+    .risk-item { margin-bottom: 16px; }
+    .risk-item:last-child { margin-bottom: 0; }
+    .risk-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+    .risk-lbl { font-size: 12px; font-weight: 600; }
+    .risk-lbl.High     { color: #dc2626; }
+    .risk-lbl.Moderate { color: #d97706; }
+    .risk-lbl.Low      { color: #16a34a; }
+    .risk-cnt { font-size: 13px; font-weight: 700; color: #1e293b; }
+    .risk-bar-bg   { height: 6px; background: #f1f5f9; border-radius: 3px; overflow: hidden; }
+    .risk-bar-fill { height: 100%; border-radius: 3px; transition: width .5s ease; }
+    .risk-bar-fill.High     { background: #ef4444; }
+    .risk-bar-fill.Moderate { background: #f59e0b; }
+    .risk-bar-fill.Low      { background: #22c55e; }
+
+    /* Patient table */
+    #table-panel { margin-bottom: 20px; }
+    .table-controls { display: flex; gap: 8px; margin-bottom: 14px; align-items: center; flex-wrap: wrap; }
+    #pt-search { flex: 1; min-width: 160px; padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; }
+    #pt-search:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 2px rgba(59,130,246,.1); }
+    #risk-filter { padding: 6px 10px; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 13px; background: white; cursor: pointer; }
+    .pt-count { font-size: 11px; color: #94a3b8; margin-left: auto; white-space: nowrap; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th { background: #f8fafc; padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #64748b; border-bottom: 1px solid #e2e8f0; white-space: nowrap; cursor: pointer; user-select: none; }
+    thead th:hover { color: #1e40af; }
+    thead th.sort-asc::after  { content: ' ↑'; color: #3b82f6; }
+    thead th.sort-desc::after { content: ' ↓'; color: #3b82f6; }
+    tbody tr { border-bottom: 1px solid #f1f5f9; }
+    tbody tr:hover { background: #f8fafc; }
+    tbody td { padding: 9px 12px; vertical-align: middle; }
+    .pt-name { font-weight: 600; color: #1e293b; display: block; }
+    .pt-id   { font-size: 10px; color: #94a3b8; }
+    .risk-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; }
+    .risk-badge.High     { background: #fef2f2; color: #dc2626; }
+    .risk-badge.Moderate { background: #fffbeb; color: #b45309; }
+    .risk-badge.Low      { background: #f0fdf4; color: #16a34a; }
+    .ssrs-badge { display: inline-block; padding: 1px 7px; border-radius: 8px; font-size: 10px; font-weight: 700; }
+    .ssrs-badge.High     { background: #fef2f2; color: #dc2626; }
+    .ssrs-badge.Moderate { background: #fffbeb; color: #b45309; }
+    .ssrs-badge.Low      { background: #f1f5f9; color: #64748b; }
+    .phq-score      { font-weight: 600; color: #475569; }
+    .phq-score.high { color: #dc2626; }
+    .phq-score.mod  { color: #d97706; }
+    .overdue-count  { font-weight: 700; color: #dc2626; }
+    .overdue-zero   { color: #94a3b8; }
+    .days-warn      { color: #d97706; font-weight: 600; }
+    .days-crit      { color: #dc2626; font-weight: 600; }
+    .days-ok        { color: #475569; }
+    .no-data-row td { text-align: center; padding: 40px 12px; color: #94a3b8; }
+
+    /* ── Chat pane ── */
+    #chat-pane { align-items: center; }
+    #chat-main { display: flex; flex-direction: column; width: 100%; max-width: 840px; flex: 1; min-height: 0; overflow: hidden; }
+    #messages { flex: 1; overflow-y: auto; padding: 20px 20px 8px; display: flex; flex-direction: column; gap: 12px; }
+    #welcome { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 40px 20px; text-align: center; }
     #welcome h2 { font-size: 22px; color: #1e3a8a; margin-bottom: 8px; }
-    #welcome p { color: #64748b; font-size: 14px; line-height: 1.6; }
-
-    /* Message rows */
+    #welcome p  { color: #64748b; font-size: 14px; line-height: 1.6; }
     .msg { display: flex; gap: 10px; max-width: 100%; align-items: flex-start; }
     .msg.user { flex-direction: row-reverse; }
-    .avatar {
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; flex-shrink: 0; margin-top: 2px;
-    }
-    .msg.user .avatar { background: #3b82f6; color: white; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+    .msg.user .avatar      { background: #3b82f6; color: white; }
     .msg.assistant .avatar { background: #f1f5f9; border: 1px solid #e2e8f0; }
-    .bubble {
-      max-width: 78%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 14px;
-      line-height: 1.65;
-    }
-    .msg.user .bubble {
-      background: #1e40af; color: white;
-      border-radius: 14px 14px 4px 14px;
-    }
-    .msg.assistant .bubble {
-      background: white;
-      border: 1px solid #e2e8f0;
-      border-radius: 14px 14px 14px 4px;
-    }
+    .bubble { max-width: 78%; padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.65; }
+    .msg.user .bubble      { background: #1e40af; color: white; border-radius: 14px 14px 4px 14px; }
+    .msg.assistant .bubble { background: white; border: 1px solid #e2e8f0; border-radius: 14px 14px 14px 4px; }
     .bubble strong { font-weight: 600; }
-    .bubble code {
-      background: rgba(0,0,0,.07); padding: 1px 5px;
-      border-radius: 3px; font-family: monospace; font-size: 12px;
-    }
+    .bubble code   { background: rgba(0,0,0,.07); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 12px; }
     .bubble ul, .bubble ol { padding-left: 18px; margin: 4px 0; }
     .bubble li { margin: 2px 0; }
-
-    /* Tool call chips */
-    .tool-chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 12px; color: #1e40af;
-      align-self: flex-start;
-      margin-left: 40px;
-    }
-    .tool-chip .dot {
-      width: 6px; height: 6px;
-      background: #3b82f6;
-      border-radius: 50%;
-      animation: pulse 1s infinite;
-    }
-    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-
-    /* Typing */
-    .typing {
-      display: flex; align-items: center; gap: 8px;
-      margin-left: 40px;
-      color: #94a3b8; font-size: 13px;
-    }
-    .dots span {
-      display: inline-block; width: 6px; height: 6px;
-      border-radius: 50%; background: #94a3b8;
-      animation: bounce 1.2s infinite;
-    }
-    .dots span:nth-child(2) { animation-delay: .2s; }
-    .dots span:nth-child(3) { animation-delay: .4s; }
-    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
-
-    /* Error */
-    .error-msg {
-      background: #fef2f2; border: 1px solid #fecaca;
-      border-radius: 8px; padding: 10px 14px;
-      font-size: 13px; color: #dc2626;
-      align-self: center;
-    }
-
-    /* Markdown in bubbles */
     .bubble h3 { font-size: 14px; font-weight: 700; margin: 8px 0 4px; }
     .bubble .num-list { padding-left: 18px; margin: 4px 0; list-style-type: decimal; }
     .bubble .num-list li { margin: 3px 0; }
-
-    /* Data badge states */
-    .badge.loading { opacity: 0.6; }
-    .badge.error { background: rgba(239,68,68,0.2); }
-    .badge-retry { margin-left: 8px; font-size: 11px; cursor: pointer; text-decoration: underline; opacity: 0.8; }
-    .badge-retry:hover { opacity: 1; }
-
-    /* Suggestions */
-    #suggestions {
-      padding: 6px 20px 4px;
-      display: flex; flex-wrap: wrap; gap: 6px;
-    }
+    .tool-chip { display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 4px 12px; font-size: 12px; color: #1e40af; align-self: flex-start; margin-left: 40px; }
+    .tool-chip .dot { width: 6px; height: 6px; background: #3b82f6; border-radius: 50%; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:.3; } }
+    .typing { display: flex; align-items: center; gap: 8px; margin-left: 40px; color: #94a3b8; font-size: 13px; }
+    .dots span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: bounce 1.2s infinite; }
+    .dots span:nth-child(2) { animation-delay: .2s; }
+    .dots span:nth-child(3) { animation-delay: .4s; }
+    @keyframes bounce { 0%,60%,100% { transform:translateY(0); } 30% { transform:translateY(-5px); } }
+    .error-msg { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: #dc2626; align-self: center; }
+    #suggestions { padding: 6px 20px 4px; display: flex; flex-wrap: wrap; gap: 6px; }
     #suggestions.hidden { display: none; }
-    .chip {
-      padding: 5px 12px;
-      background: white;
-      border: 1px solid #cbd5e1;
-      border-radius: 16px;
-      font-size: 12px; color: #475569;
-      cursor: pointer;
-      transition: all .15s;
-      white-space: nowrap;
-    }
+    .chip { padding: 5px 12px; background: white; border: 1px solid #cbd5e1; border-radius: 16px; font-size: 12px; color: #475569; cursor: pointer; transition: all .15s; white-space: nowrap; }
     .chip:hover { background: #1e40af; color: white; border-color: #1e40af; }
-
-    /* Input */
-    #input-area {
-      padding: 10px 20px 18px;
-      display: flex; gap: 8px; align-items: flex-end;
-    }
-    #msg-input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1px solid #cbd5e1;
-      border-radius: 12px;
-      font-size: 14px; font-family: inherit;
-      resize: none; line-height: 1.5;
-      background: white; max-height: 120px;
-    }
+    #input-area { padding: 10px 20px 16px; display: flex; gap: 8px; align-items: flex-end; }
+    #msg-input { flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 12px; font-size: 14px; font-family: inherit; resize: none; line-height: 1.5; background: white; max-height: 120px; }
     #msg-input:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
-    #send-btn {
-      width: 40px; height: 40px;
-      background: #1e40af; color: white;
-      border: none; border-radius: 10px;
-      cursor: pointer; font-size: 16px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: background .15s;
-    }
-    #send-btn:hover { background: #1d4ed8; }
+    #send-btn { width: 40px; height: 40px; background: #1e40af; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background .15s; }
+    #send-btn:hover    { background: #1d4ed8; }
     #send-btn:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    /* Footer */
-    #footer {
-      background: #f8fafc;
-      border-top: 1px solid #e2e8f0;
-      padding: 5px 20px;
-      font-size: 11px; color: #94a3b8;
-      text-align: center;
-      flex-shrink: 0;
-    }
+    /* ── Footer ── */
+    #footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 5px 20px; font-size: 11px; color: #94a3b8; text-align: center; flex-shrink: 0; }
     #footer a { color: #94a3b8; }
   </style>
 </head>
@@ -271,34 +200,93 @@
   <span class="api-note">Stored in your browser only</span>
 </div>
 
-<div id="page">
-  <div id="main">
-    <div id="messages">
-      <div id="welcome">
-        <h2>ClinicalMind AI Demo</h2>
-        <p>
-          Ask questions about your patient caseload in plain English.<br>
-          <small style="color:#94a3b8">Requires your own Anthropic API key · Synthetic dataset · Not real patient data</small>
-        </p>
+<nav id="tab-nav">
+  <button class="tab active" data-tab="dashboard" onclick="showTab('dashboard')">📊 Dashboard</button>
+  <button class="tab" data-tab="chat" onclick="showTab('chat')">💬 AI Chat</button>
+</nav>
+
+<div id="content">
+
+  <!-- Dashboard pane -->
+  <div id="dashboard-pane" class="tab-pane active">
+    <div class="dash-inner">
+
+      <div class="stat-cards" id="stat-cards">
+        <div class="stat-card blue"><div class="sc-label">Total Patients</div><div class="sc-value">—</div><div class="sc-sub">Loading…</div></div>
+        <div class="stat-card red"><div class="sc-label">High Risk</div><div class="sc-value">—</div><div class="sc-sub">Loading…</div></div>
+        <div class="stat-card amber"><div class="sc-label">KPI Compliance</div><div class="sc-value">—</div><div class="sc-sub">Target: 75%</div></div>
+        <div class="stat-card green"><div class="sc-label">Open Crises (28d)</div><div class="sc-value">—</div><div class="sc-sub">Loading…</div></div>
       </div>
-    </div>
 
-    <div id="suggestions">
-      <span class="chip" onclick="suggest(this)">Who are my highest-risk patients?</span>
-      <span class="chip" onclick="suggest(this)">Any crisis events in the last 7 days?</span>
-      <span class="chip" onclick="suggest(this)">What's our overall KPI compliance?</span>
-      <span class="chip" onclick="suggest(this)">Which patients have overdue SRA assessments?</span>
-      <span class="chip" onclick="suggest(this)">Who hasn't had contact in over 30 days?</span>
-    </div>
+      <div class="mid-row">
+        <div class="panel">
+          <div class="panel-title">KPI Compliance vs 75% Target</div>
+          <div id="kpi-bars"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title">Risk Distribution</div>
+          <div id="risk-bars"></div>
+        </div>
+      </div>
 
-    <div id="input-area">
-      <textarea id="msg-input" rows="1"
-        placeholder="Ask about your patients..."
-        onkeydown="onKey(event)"
-        oninput="resize(this)"></textarea>
-      <button id="send-btn" onclick="send()">&#10148;</button>
+      <div class="panel" id="table-panel">
+        <div class="table-controls">
+          <input type="search" id="pt-search" placeholder="Search by name, ID, or provider…" oninput="filterTable()" />
+          <select id="risk-filter" onchange="filterTable()">
+            <option value="">All risk levels</option>
+            <option value="High">High only</option>
+            <option value="Moderate">Moderate only</option>
+            <option value="Low">Low only</option>
+          </select>
+          <span class="pt-count" id="pt-count"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="pt-table">
+            <thead>
+              <tr>
+                <th onclick="sortTable('name')">Patient</th>
+                <th onclick="sortTable('risk')">Risk</th>
+                <th>Provider</th>
+                <th onclick="sortTable('phq9')">PHQ-9</th>
+                <th>SSRS</th>
+                <th onclick="sortTable('contact')">Last Contact</th>
+                <th onclick="sortTable('overdue')">Overdue KPIs</th>
+              </tr>
+            </thead>
+            <tbody id="pt-tbody">
+              <tr class="no-data-row"><td colspan="7">Loading patient data…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
+
+  <!-- Chat pane -->
+  <div id="chat-pane" class="tab-pane">
+    <div id="chat-main">
+      <div id="messages">
+        <div id="welcome">
+          <h2>ClinicalMind AI Chat</h2>
+          <p>Ask questions about your patient caseload in plain English.<br>
+          <small style="color:#94a3b8">Requires your Anthropic API key · Synthetic dataset · Not real patient data</small></p>
+        </div>
+      </div>
+      <div id="suggestions">
+        <span class="chip" onclick="suggest(this)">Who are my highest-risk patients?</span>
+        <span class="chip" onclick="suggest(this)">Any crisis events in the last 7 days?</span>
+        <span class="chip" onclick="suggest(this)">What's our overall KPI compliance?</span>
+        <span class="chip" onclick="suggest(this)">Which patients have overdue SRA assessments?</span>
+        <span class="chip" onclick="suggest(this)">Who hasn't had contact in over 30 days?</span>
+      </div>
+      <div id="input-area">
+        <textarea id="msg-input" rows="1" placeholder="Ask about your patients..." onkeydown="onKey(event)" oninput="resize(this)"></textarea>
+        <button id="send-btn" onclick="send()">&#10148;</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div id="footer">
@@ -308,14 +296,14 @@
 </div>
 
 <script>
-// ─────────────────────────────────────────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
 const MODEL       = 'claude-opus-4-6';
 const TODAY       = new Date().toISOString().split('T')[0];
 const KPI_TARGET  = 75;
 const KPI_NAMES   = ['bha','sra','aims','whodas','phq9','beh_tp','beh_csp'];
+const KPI_DISPLAY = { bha:'BHA', sra:'SRA', aims:'AIMS', whodas:'WHODAS', phq9:'PHQ-9', beh_tp:'BEH-TP', beh_csp:'BEH-CSP' };
 const PROXY       = 'https://clinicalmind-ai.samitcheema.workers.dev/';
+const RISK_ORDER  = { High: 0, Moderate: 1, Low: 2 };
 
 const SYSTEM = `You are ClinicalMind AI, a clinical decision support assistant for behavioral health case managers. You have access to tools that query a live synthetic patient cohort.
 
@@ -328,16 +316,12 @@ When responding:
 - Flag urgent items clearly (unresolved crisis events, SSRS High, PHQ-9 ≥15)
 - Note whether KPI compliance meets the 75% target`;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// LIVE DATA  (fetched from Supabase via Worker proxy at init)
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── LIVE DATA ────────────────────────────────────────────────────────────────
 let PATIENTS = [];
 
 function _latest(arr) {
   if (!arr || !arr.length) return {};
-  return arr.slice().sort((a, b) =>
-    (b.assessment_date || '') > (a.assessment_date || '') ? 1 : -1
-  )[0];
+  return arr.slice().sort((a, b) => (b.assessment_date || '') > (a.assessment_date || '') ? 1 : -1)[0];
 }
 
 function transformPatient(row) {
@@ -354,29 +338,25 @@ function transformPatient(row) {
 
   const prov = row.providers || {};
   return {
-    id:                 row.patient_id,
-    name:               row.name,
-    dob:                row.date_of_birth,
-    county:             row.county             || '',
-    service_type:       row.service_type       || '',
-    provider:           prov.name              || row.provider_id || '',
-    team:               prov.team              || '',
-    risk_level:         row.risk_level         || 'Low',
-    last_contact_date:  row.last_contact_date  || null,
-    phq9:   { score: phq9.total_score  || 0, si_present: !!phq9.suicidal_ideation,  date: phq9.assessment_date  || null },
-    gad7:   { score: gad7.total_score  || 0,                                         date: gad7.assessment_date  || null },
-    whodas: { score: whodas.total_score|| 0,                                         date: whodas.assessment_date|| null },
+    id:                row.patient_id,
+    name:              row.name,
+    dob:               row.date_of_birth,
+    county:            row.county            || '',
+    service_type:      row.service_type      || '',
+    provider:          prov.name             || row.provider_id || '',
+    team:              prov.team             || '',
+    risk_level:        row.risk_level        || 'Low',
+    last_contact_date: row.last_contact_date || null,
+    phq9:   { score: phq9.total_score   || 0, si_present: !!phq9.suicidal_ideation,  date: phq9.assessment_date   || null },
+    gad7:   { score: gad7.total_score   || 0,                                         date: gad7.assessment_date   || null },
+    whodas: { score: whodas.total_score || 0,                                         date: whodas.assessment_date || null },
     ssrs:   { risk_level: ssrs.risk_level || 'Low', plan_present: !!ssrs.plan, method_present: !!ssrs.method, date: ssrs.assessment_date || null },
-    crisis_events: (row.crisis_events || []).map(e => ({
-      date: e.crisis_date, type: e.crisis_type, resolved: !e.within_28_days
-    })),
+    crisis_events: (row.crisis_events || []).map(e => ({ date: e.crisis_date, type: e.crisis_type, resolved: !e.within_28_days })),
     kpis: kpiMap,
   };
 }
 
-function workerToken() {
-  return localStorage.getItem('cm_worker_token') || '';
-}
+function workerToken() { return localStorage.getItem('cm_worker_token') || ''; }
 
 async function loadData() {
   const select = [
@@ -394,97 +374,38 @@ async function loadData() {
     `${PROXY}supabase/patients?select=${select}&order=patient_id`,
     { headers: { Accept: 'application/json', 'x-worker-token': workerToken() } }
   );
-  if (res.status === 401) throw new Error('Invalid access code — update it in the Connect bar above');
+  if (res.status === 401) throw new Error('Invalid access code — enter it in the Connect bar above');
   if (!res.ok) throw new Error(`Supabase proxy: HTTP ${res.status}`);
   const rows = await res.json();
   PATIENTS = rows.map(transformPatient);
   return PATIENTS.length;
 }
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// TOOL DEFINITIONS
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── TOOLS ────────────────────────────────────────────────────────────────────
 const TOOLS = [
-  {
-    name: 'get_patients',
-    description: 'Returns the patient list with summary clinical data. Use for caseload overview.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        risk_level: { type:'string', enum:['High','Moderate','Low'], description:'Filter by risk level' },
-        county:     { type:'string', description:'Filter by county name (partial match)' },
-        provider:   { type:'string', description:'Filter by provider name (partial match)' }
-      }
-    }
-  },
-  {
-    name: 'get_patient_detail',
-    description: 'Returns the full clinical record for one patient — all assessments, KPIs, contacts, and crisis events.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        patient_id: { type:'string', description:'Patient ID, e.g. P001' }
-      },
-      required: ['patient_id']
-    }
-  },
-  {
-    name: 'get_high_risk_patients',
-    description: 'Returns patients with high clinical risk — PHQ-9 ≥15 or SI, SSRS High, or unresolved crisis. Sorted by acuity.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        risk_type: { type:'string', enum:['phq9','ssrs','crisis'], description:'Filter by specific risk type' }
-      }
-    }
-  },
-  {
-    name: 'get_kpi_compliance',
-    description: 'Returns KPI completion rates vs the 75% target. Optionally filter by a single KPI.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        kpi_name: { type:'string', enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp'], description:'Filter to a specific KPI' }
-      }
-    }
-  },
-  {
-    name: 'get_overdue_assessments',
-    description: 'Returns patients with one or more overdue assessments, optionally filtered by assessment type.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        assessment_type: { type:'string', enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp'], description:'Filter by assessment type' }
-      }
-    }
-  },
-  {
-    name: 'get_crisis_events',
-    description: 'Returns crisis episodes within a lookback window. Default: 28 days.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        window_days: { type:'integer', description:'Days to look back (default: 28)' }
-      }
-    }
-  },
-  {
-    name: 'get_disengaged_patients',
-    description: 'Returns patients with no contact beyond a threshold. Default: 30 days.',
-    input_schema: {
-      type: 'object',
-      properties: {
-        threshold_days: { type:'integer', description:'Days without contact to flag (default: 30)' }
-      }
-    }
-  }
+  { name: 'get_patients', description: 'Returns the patient list with summary clinical data. Use for caseload overview.',
+    input_schema: { type: 'object', properties: {
+      risk_level: { type:'string', enum:['High','Moderate','Low'] },
+      county:     { type:'string' },
+      provider:   { type:'string' }
+    }}},
+  { name: 'get_patient_detail', description: 'Returns the full clinical record for one patient.',
+    input_schema: { type: 'object', properties: { patient_id: { type:'string' } }, required: ['patient_id'] }},
+  { name: 'get_high_risk_patients', description: 'Returns patients with high clinical risk — PHQ-9 ≥15 or SI, SSRS High, or unresolved crisis.',
+    input_schema: { type: 'object', properties: { risk_type: { type:'string', enum:['phq9','ssrs','crisis'] } }}},
+  { name: 'get_kpi_compliance', description: 'Returns KPI completion rates vs the 75% target.',
+    input_schema: { type: 'object', properties: { kpi_name: { type:'string', enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp'] } }}},
+  { name: 'get_overdue_assessments', description: 'Returns patients with one or more overdue assessments.',
+    input_schema: { type: 'object', properties: { assessment_type: { type:'string', enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp'] } }}},
+  { name: 'get_crisis_events', description: 'Returns crisis episodes within a lookback window. Default: 28 days.',
+    input_schema: { type: 'object', properties: { window_days: { type:'integer' } }}},
+  { name: 'get_disengaged_patients', description: 'Returns patients with no contact beyond a threshold. Default: 30 days.',
+    input_schema: { type: 'object', properties: { threshold_days: { type:'integer' } }}},
 ];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TOOL IMPLEMENTATIONS
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── TOOL IMPLEMENTATIONS ─────────────────────────────────────────────────────
 function daysBetween(dateStr) {
+  if (!dateStr) return 999;
   return Math.round((new Date(TODAY) - new Date(dateStr)) / 86400000);
 }
 
@@ -493,18 +414,10 @@ function getPatients({ risk_level, county, provider } = {}) {
   if (risk_level) pts = pts.filter(p => p.risk_level === risk_level);
   if (county)     pts = pts.filter(p => p.county.toLowerCase().includes(county.toLowerCase()));
   if (provider)   pts = pts.filter(p => p.provider.toLowerCase().includes(provider.toLowerCase()));
-  return {
-    total: pts.length,
-    filters: { risk_level: risk_level||null, county: county||null, provider: provider||null },
-    patients: pts.map(p => ({
-      id: p.id, name: p.name, risk_level: p.risk_level,
-      county: p.county, provider: p.provider,
-      phq9_score: p.phq9.score, si_present: p.phq9.si_present,
-      last_contact_date: p.last_contact_date,
-      days_since_contact: daysBetween(p.last_contact_date),
-      open_crisis_events: p.crisis_events.filter(e => !e.resolved).length
-    }))
-  };
+  return { total: pts.length, filters: { risk_level: risk_level||null, county: county||null, provider: provider||null },
+    patients: pts.map(p => ({ id: p.id, name: p.name, risk_level: p.risk_level, county: p.county, provider: p.provider,
+      phq9_score: p.phq9.score, si_present: p.phq9.si_present, last_contact_date: p.last_contact_date,
+      days_since_contact: daysBetween(p.last_contact_date), open_crisis_events: p.crisis_events.filter(e => !e.resolved).length })) };
 }
 
 function getPatientDetail({ patient_id } = {}) {
@@ -515,202 +428,293 @@ function getPatientDetail({ patient_id } = {}) {
 
 function getHighRiskPatients({ risk_type } = {}) {
   let pts;
-  if (risk_type === 'phq9')   pts = PATIENTS.filter(p => p.phq9.score >= 15 || p.phq9.si_present);
-  else if (risk_type === 'ssrs')  pts = PATIENTS.filter(p => p.ssrs.risk_level === 'High' || p.ssrs.plan_present || p.ssrs.method_present);
+  if (risk_type === 'phq9')    pts = PATIENTS.filter(p => p.phq9.score >= 15 || p.phq9.si_present);
+  else if (risk_type === 'ssrs')   pts = PATIENTS.filter(p => p.ssrs.risk_level === 'High' || p.ssrs.plan_present || p.ssrs.method_present);
   else if (risk_type === 'crisis') pts = PATIENTS.filter(p => p.crisis_events.some(e => !e.resolved));
   else pts = PATIENTS.filter(p => p.risk_level === 'High');
-
-  return {
-    total: pts.length, risk_type: risk_type || 'all',
-    patients: pts.map(p => ({
-      id: p.id, name: p.name, risk_level: p.risk_level, provider: p.provider,
-      phq9_score: p.phq9.score, si_present: p.phq9.si_present,
-      ssrs_risk: p.ssrs.risk_level, ssrs_plan: p.ssrs.plan_present, ssrs_method: p.ssrs.method_present,
-      open_crisis_events: p.crisis_events.filter(e => !e.resolved),
-      last_contact_date: p.last_contact_date
-    }))
-  };
+  return { total: pts.length, risk_type: risk_type || 'all',
+    patients: pts.map(p => ({ id: p.id, name: p.name, risk_level: p.risk_level, provider: p.provider,
+      phq9_score: p.phq9.score, si_present: p.phq9.si_present, ssrs_risk: p.ssrs.risk_level,
+      ssrs_plan: p.ssrs.plan_present, ssrs_method: p.ssrs.method_present,
+      open_crisis_events: p.crisis_events.filter(e => !e.resolved), last_contact_date: p.last_contact_date })) };
 }
 
 function getKpiCompliance({ kpi_name } = {}) {
   const by_kpi = {};
   for (const n of KPI_NAMES) {
-    const overdue = PATIENTS.filter(p => p.kpis[n].overdue).length;
+    const overdue   = PATIENTS.filter(p => p.kpis[n].overdue).length;
     const compliant = PATIENTS.length - overdue;
-    by_kpi[n] = {
-      total: PATIENTS.length, compliant, overdue,
+    by_kpi[n] = { total: PATIENTS.length, compliant, overdue,
       compliance_pct: Math.round(compliant / PATIENTS.length * 100),
-      meets_target: Math.round(compliant / PATIENTS.length * 100) >= KPI_TARGET
-    };
+      meets_target: Math.round(compliant / PATIENTS.length * 100) >= KPI_TARGET };
   }
-  const totalKpis = PATIENTS.length * KPI_NAMES.length;
+  const totalKpis    = PATIENTS.length * KPI_NAMES.length;
   const overdueTotal = KPI_NAMES.reduce((s, n) => s + by_kpi[n].overdue, 0);
-  const overallPct = Math.round((totalKpis - overdueTotal) / totalKpis * 100);
-
-  const result = {
-    overall_compliance_pct: overallPct,
-    overall_meets_target: overallPct >= KPI_TARGET,
-    target_pct: KPI_TARGET,
-    total_patients: PATIENTS.length
-  };
-  if (kpi_name) {
-    result.kpi = kpi_name;
-    result.stats = by_kpi[kpi_name.toLowerCase()];
-  } else {
-    result.by_kpi = by_kpi;
-  }
+  const overallPct   = Math.round((totalKpis - overdueTotal) / totalKpis * 100);
+  const result = { overall_compliance_pct: overallPct, overall_meets_target: overallPct >= KPI_TARGET, target_pct: KPI_TARGET, total_patients: PATIENTS.length };
+  if (kpi_name) { result.kpi = kpi_name; result.stats = by_kpi[kpi_name.toLowerCase()]; }
+  else           { result.by_kpi = by_kpi; }
   return result;
 }
 
 function getOverdueAssessments({ assessment_type } = {}) {
-  const names = assessment_type ? [assessment_type.toLowerCase()] : KPI_NAMES;
+  const names  = assessment_type ? [assessment_type.toLowerCase()] : KPI_NAMES;
   const result = [];
   for (const p of PATIENTS) {
-    const overdue = names
-      .filter(n => p.kpis[n].overdue)
-      .map(n => ({
-        kpi: n.toUpperCase().replace('_','-'),
-        last_completed: p.kpis[n].last_completed,
-        due_date: p.kpis[n].due_date,
-        days_overdue: daysBetween(p.kpis[n].due_date)
-      }));
+    const overdue = names.filter(n => p.kpis[n].overdue).map(n => ({
+      kpi: n.toUpperCase().replace('_','-'), last_completed: p.kpis[n].last_completed,
+      due_date: p.kpis[n].due_date, days_overdue: daysBetween(p.kpis[n].due_date) }));
     if (overdue.length) result.push({ id:p.id, name:p.name, risk_level:p.risk_level, provider:p.provider, overdue_assessments:overdue });
   }
   return { total_patients_with_overdue: result.length, assessment_type: assessment_type||'all', patients: result };
 }
 
 function getCrisisEvents({ window_days = 28 } = {}) {
-  const cutoff = new Date(TODAY);
-  cutoff.setDate(cutoff.getDate() - window_days);
+  const cutoff    = new Date(TODAY); cutoff.setDate(cutoff.getDate() - window_days);
   const cutoffStr = cutoff.toISOString().split('T')[0];
-
-  const events = [];
-  for (const p of PATIENTS) {
-    for (const e of p.crisis_events) {
-      if (e.date >= cutoffStr) {
-        events.push({
-          patient_id: p.id, patient_name: p.name, provider: p.provider, risk_level: p.risk_level,
-          event_date: e.date, event_type: e.type, resolved: e.resolved,
-          days_ago: daysBetween(e.date)
-        });
-      }
-    }
-  }
+  const events    = [];
+  for (const p of PATIENTS)
+    for (const e of p.crisis_events)
+      if (e.date >= cutoffStr)
+        events.push({ patient_id: p.id, patient_name: p.name, provider: p.provider, risk_level: p.risk_level,
+          event_date: e.date, event_type: e.type, resolved: e.resolved, days_ago: daysBetween(e.date) });
   events.sort((a,b) => b.event_date.localeCompare(a.event_date));
-  return {
-    window_days, cutoff_date: cutoffStr,
-    total_events: events.length,
-    unresolved_events: events.filter(e => !e.resolved).length,
-    events
-  };
+  return { window_days, cutoff_date: cutoffStr, total_events: events.length, unresolved_events: events.filter(e => !e.resolved).length, events };
 }
 
 function getDisengagedPatients({ threshold_days = 30 } = {}) {
-  const pts = PATIENTS
-    .map(p => ({ ...p, days_since_contact: daysBetween(p.last_contact_date) }))
-    .filter(p => p.days_since_contact > threshold_days)
-    .sort((a,b) => b.days_since_contact - a.days_since_contact);
-  return {
-    threshold_days, total_disengaged: pts.length,
-    patients: pts.map(p => ({
-      id:p.id, name:p.name, risk_level:p.risk_level, provider:p.provider,
-      last_contact_date:p.last_contact_date, days_since_contact:p.days_since_contact
-    }))
-  };
+  const pts = PATIENTS.map(p => ({ ...p, days_since_contact: daysBetween(p.last_contact_date) }))
+    .filter(p => p.days_since_contact > threshold_days).sort((a,b) => b.days_since_contact - a.days_since_contact);
+  return { threshold_days, total_disengaged: pts.length,
+    patients: pts.map(p => ({ id:p.id, name:p.name, risk_level:p.risk_level, provider:p.provider,
+      last_contact_date:p.last_contact_date, days_since_contact:p.days_since_contact })) };
 }
 
 function runTool(name, input) {
   switch (name) {
-    case 'get_patients':           return getPatients(input);
-    case 'get_patient_detail':     return getPatientDetail(input);
-    case 'get_high_risk_patients': return getHighRiskPatients(input);
-    case 'get_kpi_compliance':     return getKpiCompliance(input);
-    case 'get_overdue_assessments':return getOverdueAssessments(input);
-    case 'get_crisis_events':      return getCrisisEvents(input);
-    case 'get_disengaged_patients':return getDisengagedPatients(input);
+    case 'get_patients':            return getPatients(input);
+    case 'get_patient_detail':      return getPatientDetail(input);
+    case 'get_high_risk_patients':  return getHighRiskPatients(input);
+    case 'get_kpi_compliance':      return getKpiCompliance(input);
+    case 'get_overdue_assessments': return getOverdueAssessments(input);
+    case 'get_crisis_events':       return getCrisisEvents(input);
+    case 'get_disengaged_patients': return getDisengagedPatients(input);
     default: return { error: `Unknown tool: ${name}` };
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// CLAUDE API + AGENTIC LOOP
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── CLAUDE API ───────────────────────────────────────────────────────────────
 let history = [];
-let busy = false;
+let busy    = false;
 
 async function callClaude(messages) {
   const key = localStorage.getItem('cm_api_key');
   if (!key) throw new Error('No API key — click Connect above');
-
   let res;
   try {
     res = await fetch(PROXY, {
       method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-allow-browser': 'true'
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1024,
-        system: SYSTEM,
-        tools: TOOLS,
-        messages
-      })
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-allow-browser': 'true' },
+      body: JSON.stringify({ model: MODEL, max_tokens: 1024, system: SYSTEM, tools: TOOLS, messages })
     });
-  } catch (e) {
-    console.error('Fetch error:', e);
-    throw new Error(`Network error — check the browser console (Cmd+Opt+I) for details. Raw: ${e.message}`);
-  }
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    console.error('API error:', res.status, err);
-    throw new Error(err?.error?.message || `HTTP ${res.status}`);
-  }
+  } catch (e) { throw new Error(`Network error: ${e.message}`); }
+  if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err?.error?.message || `HTTP ${res.status}`); }
   return res.json();
 }
 
 async function chat(userText) {
-  const messages = [
-    ...history,
-    { role: 'user', content: userText }
-  ];
-
+  const messages = [...history, { role: 'user', content: userText }];
   while (true) {
     const resp = await callClaude(messages);
     messages.push({ role: 'assistant', content: resp.content });
-
     if (resp.stop_reason === 'end_turn') {
-      // Save trimmed history (text only, no tool blocks)
       const text = resp.content.find(b => b.type === 'text')?.text || '';
-      history.push(
-        { role: 'user',      content: userText },
-        { role: 'assistant', content: text }
-      );
-      // Keep last 10 turns to avoid unbounded growth
+      history.push({ role: 'user', content: userText }, { role: 'assistant', content: text });
       if (history.length > 20) history = history.slice(-20);
       return text;
     }
-
     if (resp.stop_reason === 'tool_use') {
-      const toolUses = resp.content.filter(b => b.type === 'tool_use');
+      const toolUses    = resp.content.filter(b => b.type === 'tool_use');
       const toolResults = [];
       for (const tu of toolUses) {
         addToolChip(tu.name, tu.input);
-        const result = runTool(tu.name, tu.input);
-        toolResults.push({ type:'tool_result', tool_use_id:tu.id, content:JSON.stringify(result) });
+        toolResults.push({ type:'tool_result', tool_use_id:tu.id, content:JSON.stringify(runTool(tu.name, tu.input)) });
       }
       messages.push({ role: 'user', content: toolResults });
     }
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// UI
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── DASHBOARD ────────────────────────────────────────────────────────────────
+let tableSort   = { col: 'risk', dir: 'desc' };
+let tableFilter = { text: '', risk: '' };
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function computeStats() {
+  const total  = PATIENTS.length;
+  const byRisk = { High: 0, Moderate: 0, Low: 0 };
+  for (const p of PATIENTS) byRisk[p.risk_level] = (byRisk[p.risk_level] || 0) + 1;
+
+  const kpiStats = {};
+  for (const k of KPI_NAMES) {
+    const overdue   = PATIENTS.filter(p => p.kpis[k].overdue).length;
+    const compliant = total - overdue;
+    kpiStats[k] = { compliant, overdue, pct: total ? Math.round(compliant / total * 100) : 0 };
+  }
+  const totalKpis    = total * KPI_NAMES.length;
+  const overdueTotal = KPI_NAMES.reduce((s, k) => s + kpiStats[k].overdue, 0);
+  const overallPct   = totalKpis ? Math.round((totalKpis - overdueTotal) / totalKpis * 100) : 0;
+
+  const cutoff    = new Date(TODAY); cutoff.setDate(cutoff.getDate() - 28);
+  const cutoffStr = cutoff.toISOString().split('T')[0];
+  const openCrises = PATIENTS.reduce((n, p) => n + p.crisis_events.filter(e => e.date >= cutoffStr && !e.resolved).length, 0);
+
+  return { total, byRisk, kpiStats, overallPct, openCrises };
+}
+
+function renderDashboard() {
+  if (!PATIENTS.length) return;
+  const s = computeStats();
+
+  // Stat cards
+  const kpiColor = s.overallPct >= KPI_TARGET ? 'green' : 'amber';
+  const kpiCls   = s.overallPct >= KPI_TARGET ? 'green' : 'amber';
+  document.getElementById('stat-cards').innerHTML = `
+    <div class="stat-card blue">
+      <div class="sc-label">Total Patients</div>
+      <div class="sc-value">${s.total}</div>
+      <div class="sc-sub">Active caseload</div>
+    </div>
+    <div class="stat-card red">
+      <div class="sc-label">High Risk</div>
+      <div class="sc-value ${s.byRisk.High > 0 ? 'red' : ''}">${s.byRisk.High}</div>
+      <div class="sc-sub">${Math.round(s.byRisk.High / s.total * 100)}% of caseload</div>
+    </div>
+    <div class="stat-card ${kpiColor}">
+      <div class="sc-label">KPI Compliance</div>
+      <div class="sc-value ${kpiCls}">${s.overallPct}%</div>
+      <div class="sc-sub">Target: ${KPI_TARGET}%</div>
+    </div>
+    <div class="stat-card ${s.openCrises > 0 ? 'red' : 'green'}">
+      <div class="sc-label">Open Crises (28d)</div>
+      <div class="sc-value ${s.openCrises > 0 ? 'red' : 'green'}">${s.openCrises}</div>
+      <div class="sc-sub">Unresolved events</div>
+    </div>`;
+
+  // KPI bars
+  document.getElementById('kpi-bars').innerHTML = KPI_NAMES.map(k => {
+    const pct = s.kpiStats[k].pct;
+    const cls = pct >= KPI_TARGET ? 'meets' : 'below';
+    return `<div class="kpi-row">
+      <span class="kpi-name">${KPI_DISPLAY[k]}</span>
+      <div class="kpi-bar-outer">
+        <div class="kpi-bar-bg"><div class="kpi-bar-fill ${cls}" style="width:${pct}%"></div></div>
+        <div class="kpi-target-tick" title="75% target"></div>
+      </div>
+      <span class="kpi-pct ${cls}">${pct}%</span>
+    </div>`;
+  }).join('');
+
+  // Risk breakdown
+  document.getElementById('risk-bars').innerHTML = ['High','Moderate','Low'].map(r => {
+    const cnt = s.byRisk[r] || 0;
+    const pct = s.total ? Math.round(cnt / s.total * 100) : 0;
+    return `<div class="risk-item">
+      <div class="risk-header">
+        <span class="risk-lbl ${r}">${r}</span>
+        <span class="risk-cnt">${cnt} <small style="color:#94a3b8;font-weight:400">(${pct}%)</small></span>
+      </div>
+      <div class="risk-bar-bg"><div class="risk-bar-fill ${r}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  renderTable();
+}
+
+function renderTable() {
+  const search = tableFilter.text.toLowerCase();
+  const riskF  = tableFilter.risk;
+
+  let pts = PATIENTS.filter(p => {
+    if (riskF && p.risk_level !== riskF) return false;
+    if (search && !p.name.toLowerCase().includes(search) &&
+        !p.provider.toLowerCase().includes(search) &&
+        !p.id.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  pts = pts.slice().sort((a, b) => {
+    let va, vb;
+    switch (tableSort.col) {
+      case 'name':    va = a.name;                         vb = b.name;                        break;
+      case 'risk':    va = RISK_ORDER[a.risk_level] ?? 2;  vb = RISK_ORDER[b.risk_level] ?? 2; break;
+      case 'phq9':    va = a.phq9.score;                   vb = b.phq9.score;                  break;
+      case 'contact': va = a.last_contact_date || '';      vb = b.last_contact_date || '';      break;
+      case 'overdue': va = KPI_NAMES.filter(k => a.kpis[k].overdue).length;
+                      vb = KPI_NAMES.filter(k => b.kpis[k].overdue).length; break;
+      default: va = 0; vb = 0;
+    }
+    const cmp = typeof va === 'string' ? va.localeCompare(vb) : (va - vb);
+    return tableSort.dir === 'asc' ? cmp : -cmp;
+  });
+
+  // Update sort indicators
+  const colIdx = { name:0, risk:1, phq9:3, contact:5, overdue:6 };
+  document.querySelectorAll('#pt-table thead th').forEach((th, i) => {
+    th.classList.remove('sort-asc','sort-desc');
+    if (i === colIdx[tableSort.col]) th.classList.add('sort-' + tableSort.dir);
+  });
+
+  document.getElementById('pt-count').textContent = `${pts.length} of ${PATIENTS.length} patients`;
+
+  if (!pts.length) {
+    document.getElementById('pt-tbody').innerHTML = '<tr class="no-data-row"><td colspan="7">No patients match the current filter.</td></tr>';
+    return;
+  }
+
+  document.getElementById('pt-tbody').innerHTML = pts.map(p => {
+    const days      = daysBetween(p.last_contact_date);
+    const daysCls   = days > 60 ? 'days-crit' : days > 30 ? 'days-warn' : 'days-ok';
+    const daysLabel = days >= 999 ? 'Unknown' : `${days}d ago`;
+    const phqCls    = p.phq9.score >= 15 || p.phq9.si_present ? 'high' : p.phq9.score >= 10 ? 'mod' : '';
+    const phqLabel  = p.phq9.score + (p.phq9.si_present ? ' ⚠' : '');
+    const overdueCnt = KPI_NAMES.filter(k => p.kpis[k].overdue).length;
+    return `<tr>
+      <td><span class="pt-name">${esc(p.name)}</span><span class="pt-id">${esc(p.id)}</span></td>
+      <td><span class="risk-badge ${p.risk_level}">${p.risk_level}</span></td>
+      <td>${esc(p.provider)}</td>
+      <td><span class="phq-score ${phqCls}">${phqLabel}</span></td>
+      <td><span class="ssrs-badge ${p.ssrs.risk_level}">${p.ssrs.risk_level}</span></td>
+      <td><span class="${daysCls}">${daysLabel}</span></td>
+      <td>${overdueCnt > 0 ? `<span class="overdue-count">${overdueCnt}</span>` : '<span class="overdue-zero">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function filterTable() {
+  tableFilter.text = document.getElementById('pt-search').value;
+  tableFilter.risk = document.getElementById('risk-filter').value;
+  renderTable();
+}
+
+function sortTable(col) {
+  tableSort.dir = tableSort.col === col ? (tableSort.dir === 'asc' ? 'desc' : 'asc') : (col === 'name' ? 'asc' : 'desc');
+  tableSort.col = col;
+  renderTable();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(name + '-pane').classList.add('active');
+  document.querySelector(`.tab[data-tab="${name}"]`).classList.add('active');
+  if (name === 'dashboard' && PATIENTS.length > 0) renderDashboard();
+}
+
+// ─── CHAT UI ──────────────────────────────────────────────────────────────────
 const TOOL_LABELS = {
   get_patients:            () => 'Querying patient list',
   get_patient_detail:      i  => `Getting details: ${i.patient_id}`,
@@ -726,9 +730,8 @@ function saveKey() {
   const t = document.getElementById('worker-token-input').value.trim();
   if (k) localStorage.setItem('cm_api_key', k);
   if (t) localStorage.setItem('cm_worker_token', t);
-  if (k || t) {
+  if (localStorage.getItem('cm_worker_token')) {
     document.getElementById('api-setup').classList.add('hidden');
-    // Reload data if token just set and we had no patients
     if (t && PATIENTS.length === 0) initData();
   }
 }
@@ -738,31 +741,16 @@ function checkKey() {
   const t = localStorage.getItem('cm_worker_token');
   if (k) document.getElementById('api-key-input').value = k;
   if (t) document.getElementById('worker-token-input').value = t;
-  if (k && t) document.getElementById('api-setup').classList.add('hidden');
-}
-
-function esc(s) {
-  return String(s)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;');
+  if (t) document.getElementById('api-setup').classList.add('hidden');
 }
 
 function fmt(text) {
   const lines = esc(text).split('\n');
   const out = [];
   let inNumList = false;
-
   for (const line of lines) {
-    // Close numbered list if we leave it
-    if (inNumList && !/^\d+\.\s/.test(line.trim())) {
-      out.push('</ol>');
-      inNumList = false;
-    }
-
-    let l = line
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/`(.*?)`/g, '<code>$1</code>');
-
+    if (inNumList && !/^\d+\.\s/.test(line.trim())) { out.push('</ol>'); inNumList = false; }
+    let l = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/`(.*?)`/g, '<code>$1</code>');
     if (/^#{1,3}\s/.test(l)) {
       l = `<h3>${l.replace(/^#{1,3}\s/, '')}</h3>`;
     } else if (/^\d+\.\s/.test(l.trim())) {
@@ -781,13 +769,10 @@ function addMsg(role, text) {
   const welcome = document.getElementById('welcome');
   if (welcome) welcome.remove();
   document.getElementById('suggestions').classList.add('hidden');
-
   const msgs = document.getElementById('messages');
-  const row = document.createElement('div');
+  const row  = document.createElement('div');
   row.className = `msg ${role}`;
-  row.innerHTML = `
-    <div class="avatar">${role==='user'?'👤':'🤖'}</div>
-    <div class="bubble">${fmt(text)}</div>`;
+  row.innerHTML = `<div class="avatar">${role==='user'?'👤':'🤖'}</div><div class="bubble">${fmt(text)}</div>`;
   msgs.appendChild(row);
   msgs.scrollTop = msgs.scrollHeight;
 }
@@ -797,8 +782,7 @@ function addToolChip(name, input) {
   const msgs = document.getElementById('messages');
   const chip = document.createElement('div');
   chip.className = 'tool-chip';
-  const label = (TOOL_LABELS[name] || (() => name))(input);
-  chip.innerHTML = `<span class="dot"></span><span>🔧 ${esc(label)}</span>`;
+  chip.innerHTML = `<span class="dot"></span><span>🔧 ${esc((TOOL_LABELS[name] || (() => name))(input))}</span>`;
   msgs.appendChild(chip);
   msgs.scrollTop = msgs.scrollHeight;
   setTimeout(addTyping, 80);
@@ -807,23 +791,19 @@ function addToolChip(name, input) {
 function addTyping() {
   removeTyping();
   const msgs = document.getElementById('messages');
-  const el = document.createElement('div');
-  el.id = 'typing';
-  el.className = 'typing';
+  const el   = document.createElement('div');
+  el.id = 'typing'; el.className = 'typing';
   el.innerHTML = `<div class="dots"><span></span><span></span><span></span></div><span>Thinking…</span>`;
   msgs.appendChild(el);
   msgs.scrollTop = msgs.scrollHeight;
 }
 
-function removeTyping() {
-  const el = document.getElementById('typing');
-  if (el) el.remove();
-}
+function removeTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
 
 function addError(msg) {
   removeTyping();
   const msgs = document.getElementById('messages');
-  const el = document.createElement('div');
+  const el   = document.createElement('div');
   el.className = 'error-msg';
   el.textContent = `Error: ${msg}`;
   msgs.appendChild(el);
@@ -833,52 +813,26 @@ function addError(msg) {
 async function send() {
   if (busy) return;
   const input = document.getElementById('msg-input');
-  const text = input.value.trim();
+  const text  = input.value.trim();
   if (!text) return;
-
   const key = localStorage.getItem('cm_api_key');
-  if (!key) {
-    document.getElementById('api-setup').classList.remove('hidden');
-    document.getElementById('api-key-input').focus();
-    return;
-  }
-
+  if (!key) { document.getElementById('api-setup').classList.remove('hidden'); document.getElementById('api-key-input').focus(); return; }
   busy = true;
-  input.value = '';
-  input.style.height = 'auto';
+  input.value = ''; input.style.height = 'auto';
   document.getElementById('send-btn').disabled = true;
-
-  addMsg('user', text);
-  addTyping();
-
+  addMsg('user', text); addTyping();
   try {
     const reply = await chat(text);
-    removeTyping();
-    addMsg('assistant', reply);
-  } catch (err) {
-    addError(err.message);
-  } finally {
-    busy = false;
-    document.getElementById('send-btn').disabled = false;
-    document.getElementById('msg-input').focus();
-  }
+    removeTyping(); addMsg('assistant', reply);
+  } catch (err) { addError(err.message); }
+  finally { busy = false; document.getElementById('send-btn').disabled = false; document.getElementById('msg-input').focus(); }
 }
 
-function suggest(el) {
-  document.getElementById('msg-input').value = el.textContent;
-  send();
-}
+function suggest(el) { document.getElementById('msg-input').value = el.textContent; send(); }
+function onKey(e)    { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
+function resize(el)  { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }
 
-function onKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-}
-
-function resize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-// Init
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 checkKey();
 ['api-key-input', 'worker-token-input'].forEach(id => {
   document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
@@ -886,11 +840,11 @@ checkKey();
 
 function initData() {
   const badge = document.getElementById('data-badge');
-  badge.textContent = 'Loading data…';
-  badge.className = 'badge loading';
+  badge.textContent = 'Loading data…'; badge.className = 'badge loading';
   loadData().then(n => {
     badge.textContent = `Live Data · ${n} Patients · ${TODAY}`;
     badge.className = 'badge';
+    renderDashboard();
   }).catch(err => {
     console.warn('Could not load Supabase data:', err);
     badge.className = 'badge error';
