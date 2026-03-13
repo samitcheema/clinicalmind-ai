@@ -14,6 +14,9 @@ LOINC / coding systems used:
   KPI:          http://clinicalmind.ai/fhir/kpi
   Crisis:       http://clinicalmind.ai/fhir/crisis
 """
+from __future__ import annotations
+
+
 
 import json
 from datetime import datetime

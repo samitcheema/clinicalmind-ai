@@ -1,11 +1,16 @@
 -- ============================================================
--- ClinicalMind AI — Supabase Schema
--- Run this in the Supabase SQL Editor before running seed.py
+-- ClinicalMind AI — Supabase Schema  (reference copy)
+--
+-- NOTE: orchestrator.py runs ensure_schema.py automatically before
+--       each pipeline run.  You only need this file if you want to
+--       apply the schema manually in the Supabase SQL Editor.
+--
+-- All statements use CREATE TABLE IF NOT EXISTS — safe to re-run.
 --
 -- Architecture:
 --   Private tables  (service_role key only — MCP server):
 --     providers, patients, assessments_*, encounters,
---     contacts, crisis_events, kpi_compliance
+--     contacts, crisis_events, kpi_compliance, pipeline_runs
 --   Public table  (anon key — website dashboard):
 --     clinic_stats  (aggregate only, zero PII)
 -- ============================================================
@@ -13,22 +18,9 @@
 -- ── Extensions ───────────────────────────────────────────────
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ── Drop existing tables (safe re-run) ───────────────────────
-DROP TABLE IF EXISTS kpi_compliance   CASCADE;
-DROP TABLE IF EXISTS crisis_events    CASCADE;
-DROP TABLE IF EXISTS contacts         CASCADE;
-DROP TABLE IF EXISTS encounters       CASCADE;
-DROP TABLE IF EXISTS assessments_ssrs   CASCADE;
-DROP TABLE IF EXISTS assessments_whodas CASCADE;
-DROP TABLE IF EXISTS assessments_gad7   CASCADE;
-DROP TABLE IF EXISTS assessments_phq9   CASCADE;
-DROP TABLE IF EXISTS patients         CASCADE;
-DROP TABLE IF EXISTS providers        CASCADE;
-DROP TABLE IF EXISTS clinic_stats     CASCADE;
-
 
 -- ── providers ─────────────────────────────────────────────────
-CREATE TABLE providers (
+CREATE TABLE IF NOT EXISTS providers (
     provider_id  TEXT PRIMARY KEY,
     name         TEXT NOT NULL,
     team         TEXT NOT NULL,
@@ -36,7 +28,7 @@ CREATE TABLE providers (
 );
 
 -- ── patients (PHI — service_role only) ────────────────────────
-CREATE TABLE patients (
+CREATE TABLE IF NOT EXISTS patients (
     patient_id                TEXT PRIMARY KEY,
     name                      TEXT NOT NULL,        -- synthetic only; strip in public views
     date_of_birth             DATE NOT NULL,        -- synthetic only
@@ -56,7 +48,7 @@ CREATE TABLE patients (
 );
 
 -- ── assessments_phq9 ──────────────────────────────────────────
-CREATE TABLE assessments_phq9 (
+CREATE TABLE IF NOT EXISTS assessments_phq9 (
     id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     patient_id        TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     assessment_date   DATE,
@@ -68,7 +60,7 @@ CREATE TABLE assessments_phq9 (
 );
 
 -- ── assessments_gad7 ──────────────────────────────────────────
-CREATE TABLE assessments_gad7 (
+CREATE TABLE IF NOT EXISTS assessments_gad7 (
     id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     patient_id        TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     assessment_date   DATE,
@@ -79,7 +71,7 @@ CREATE TABLE assessments_gad7 (
 );
 
 -- ── assessments_whodas ────────────────────────────────────────
-CREATE TABLE assessments_whodas (
+CREATE TABLE IF NOT EXISTS assessments_whodas (
     id                UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     patient_id        TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     assessment_date   DATE,
@@ -89,7 +81,7 @@ CREATE TABLE assessments_whodas (
 );
 
 -- ── assessments_ssrs ──────────────────────────────────────────
-CREATE TABLE assessments_ssrs (
+CREATE TABLE IF NOT EXISTS assessments_ssrs (
     id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     patient_id          TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     assessment_date     DATE,
@@ -104,7 +96,7 @@ CREATE TABLE assessments_ssrs (
 );
 
 -- ── encounters ────────────────────────────────────────────────
-CREATE TABLE encounters (
+CREATE TABLE IF NOT EXISTS encounters (
     encounter_id    TEXT PRIMARY KEY,
     patient_id      TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     admit_date      DATE,
@@ -114,7 +106,7 @@ CREATE TABLE encounters (
 );
 
 -- ── contacts ──────────────────────────────────────────────────
-CREATE TABLE contacts (
+CREATE TABLE IF NOT EXISTS contacts (
     contact_id    TEXT PRIMARY KEY,
     patient_id    TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     contact_date  DATE,
@@ -125,7 +117,7 @@ CREATE TABLE contacts (
 );
 
 -- ── crisis_events ─────────────────────────────────────────────
-CREATE TABLE crisis_events (
+CREATE TABLE IF NOT EXISTS crisis_events (
     event_id         TEXT PRIMARY KEY,
     patient_id       TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     crisis_date      DATE,
@@ -137,7 +129,7 @@ CREATE TABLE crisis_events (
 );
 
 -- ── kpi_compliance ────────────────────────────────────────────
-CREATE TABLE kpi_compliance (
+CREATE TABLE IF NOT EXISTS kpi_compliance (
     id             UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     patient_id     TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
     kpi_name       TEXT NOT NULL,
@@ -151,7 +143,7 @@ CREATE TABLE kpi_compliance (
 -- ── clinic_stats  (PUBLIC — anon can read, no PII) ────────────
 -- Single-row summary refreshed by seed.py after every pipeline run.
 -- The website reads this table with the anon key.
-CREATE TABLE clinic_stats (
+CREATE TABLE IF NOT EXISTS clinic_stats (
     id                          INT PRIMARY KEY DEFAULT 1,
     total_patients              INT,
     high_risk_count             INT,
@@ -200,5 +192,26 @@ BEGIN
 END $$;
 
 -- Public table: anon can SELECT, service_role has full access
-CREATE POLICY "anon_select"        ON clinic_stats FOR SELECT TO anon         USING (true);
-CREATE POLICY "service_role_all"   ON clinic_stats FOR ALL    TO service_role USING (true) WITH CHECK (true);
+CREATE POLICY IF NOT EXISTS "anon_select"        ON clinic_stats FOR SELECT TO anon         USING (true);
+CREATE POLICY IF NOT EXISTS "service_role_all"   ON clinic_stats FOR ALL    TO service_role USING (true) WITH CHECK (true);
+
+
+-- ── pipeline_runs  (operational audit log — service_role only) ─────────────
+-- One row per orchestrator.py execution. Persisted in Stage 5 of each run.
+CREATE TABLE IF NOT EXISTS pipeline_runs (
+    run_id               TEXT PRIMARY KEY,           -- cm-YYYYMMDD-HHMMSS-xxxxxx
+    started_at           TIMESTAMPTZ NOT NULL,
+    completed_at         TIMESTAMPTZ,
+    status               TEXT NOT NULL DEFAULT 'running', -- running | success | failed
+    config               JSONB,                      -- CLI flags used for this run
+    records_extracted    INT DEFAULT 0,
+    records_transformed  INT DEFAULT 0,
+    records_loaded       INT DEFAULT 0,
+    records_rejected     INT DEFAULT 0,
+    stages               JSONB,                      -- array of StageResult dicts
+    error_message        TEXT
+);
+
+ALTER TABLE pipeline_runs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "service_role_all" ON pipeline_runs
+    FOR ALL TO service_role USING (true) WITH CHECK (true);

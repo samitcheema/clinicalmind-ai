@@ -20,6 +20,9 @@ Usage:
     python generate_fhir.py          # writes fhir_output.json (60 patients)
     python generate_fhir.py 100      # 100 patients
 """
+from __future__ import annotations
+
+
 
 import json
 import os
