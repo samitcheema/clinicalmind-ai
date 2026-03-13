@@ -23,3 +23,11 @@ build/
 
 # Wrangler
 worker/.wrangler/
+
+# Synthea — large generated/binary files (not suitable for git)
+synthea-with-dependencies.jar
+synthea_out/
+pipeline/fhir_synthea.json
+
+# Misc
+*.pdf
