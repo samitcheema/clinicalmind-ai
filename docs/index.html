@@ -25,8 +25,8 @@
     #api-setup.hidden { display: none; }
     #api-setup label { font-size: 13px; font-weight: 500; color: #92400e; white-space: nowrap; }
     #api-setup .field-group { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 180px; }
-    #api-key-input, #worker-token-input { flex: 1; min-width: 140px; max-width: 300px; padding: 5px 10px; border: 1px solid #fcd34d; border-radius: 6px; font-size: 13px; font-family: monospace; background: white; }
-    #api-key-input:focus, #worker-token-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.2); }
+    #api-key-input { flex: 1; min-width: 140px; max-width: 300px; padding: 5px 10px; border: 1px solid #fcd34d; border-radius: 6px; font-size: 13px; font-family: monospace; background: white; }
+    #api-key-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.2); }
     #save-key-btn { padding: 5px 14px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; }
     #save-key-btn:hover { background: #d97706; }
     .api-note { font-size: 11px; color: #92400e; }
@@ -184,17 +184,12 @@
     <h1>ClinicalMind AI</h1>
     <div class="sub">Behavioral Health Decision Support</div>
   </div>
-  <div class="badge" id="data-badge">Loading data…</div>
 </header>
 
-<div id="api-setup">
+<div id="api-setup" class="hidden">
   <div class="field-group">
     <label for="api-key-input">API Key</label>
     <input type="password" id="api-key-input" placeholder="sk-ant-..." />
-  </div>
-  <div class="field-group">
-    <label for="worker-token-input">Access Code</label>
-    <input type="password" id="worker-token-input" placeholder="Demo access code" />
   </div>
   <button id="save-key-btn" onclick="saveKey()">Connect</button>
   <span class="api-note">Stored in your browser only</span>
@@ -202,7 +197,7 @@
 
 <nav id="tab-nav">
   <button class="tab active" data-tab="dashboard" onclick="showTab('dashboard')">📊 Dashboard</button>
-  <button class="tab" data-tab="chat" onclick="showTab('chat')">💬 AI Chat</button>
+  <button class="tab" data-tab="chat" onclick="showTab('chat')">💬 Chat</button>
 </nav>
 
 <div id="content">
@@ -290,8 +285,6 @@
 </div>
 
 <div id="footer">
-  Powered by <strong>Claude claude-opus-4-6</strong> via Anthropic API &nbsp;·&nbsp;
-  Live Supabase data &nbsp;·&nbsp;
   <a href="https://github.com/samitcheema/clinicalmind-ai" target="_blank">GitHub</a>
 </div>
 
@@ -356,7 +349,7 @@ function transformPatient(row) {
   };
 }
 
-function workerToken() { return localStorage.getItem('cm_worker_token') || ''; }
+const WORKER_TOKEN = 'clinicalmind2025';
 
 async function loadData() {
   const select = [
@@ -372,9 +365,9 @@ async function loadData() {
 
   const res = await fetch(
     `${PROXY}supabase/patients?select=${select}&order=patient_id`,
-    { headers: { Accept: 'application/json', 'x-worker-token': workerToken() } }
+    { headers: { Accept: 'application/json', 'x-worker-token': WORKER_TOKEN } }
   );
-  if (res.status === 401) throw new Error('Invalid access code — enter it in the Connect bar above');
+  if (res.status === 401) throw new Error('Data access error — check configuration');
   if (!res.ok) throw new Error(`Supabase proxy: HTTP ${res.status}`);
   const rows = await res.json();
   PATIENTS = rows.map(transformPatient);
@@ -712,6 +705,11 @@ function showTab(name) {
   document.getElementById(name + '-pane').classList.add('active');
   document.querySelector(`.tab[data-tab="${name}"]`).classList.add('active');
   if (name === 'dashboard' && PATIENTS.length > 0) renderDashboard();
+  if (name === 'chat' && !localStorage.getItem('cm_api_key')) {
+    document.getElementById('api-setup').classList.remove('hidden');
+    document.getElementById('api-key-input').focus();
+  }
+  if (name === 'dashboard') document.getElementById('api-setup').classList.add('hidden');
 }
 
 // ─── CHAT UI ──────────────────────────────────────────────────────────────────
@@ -727,21 +725,13 @@ const TOOL_LABELS = {
 
 function saveKey() {
   const k = document.getElementById('api-key-input').value.trim();
-  const t = document.getElementById('worker-token-input').value.trim();
   if (k) localStorage.setItem('cm_api_key', k);
-  if (t) localStorage.setItem('cm_worker_token', t);
-  if (localStorage.getItem('cm_worker_token')) {
-    document.getElementById('api-setup').classList.add('hidden');
-    if (t && PATIENTS.length === 0) initData();
-  }
+  document.getElementById('api-setup').classList.add('hidden');
 }
 
 function checkKey() {
   const k = localStorage.getItem('cm_api_key');
-  const t = localStorage.getItem('cm_worker_token');
   if (k) document.getElementById('api-key-input').value = k;
-  if (t) document.getElementById('worker-token-input').value = t;
-  if (t) document.getElementById('api-setup').classList.add('hidden');
 }
 
 function fmt(text) {
@@ -834,21 +824,13 @@ function resize(el)  { el.style.height = 'auto'; el.style.height = Math.min(el.s
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 checkKey();
-['api-key-input', 'worker-token-input'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
-});
+document.getElementById('api-key-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveKey(); });
 
 function initData() {
-  const badge = document.getElementById('data-badge');
-  badge.textContent = 'Loading data…'; badge.className = 'badge loading';
-  loadData().then(n => {
-    badge.textContent = `Live Data · ${n} Patients · ${TODAY}`;
-    badge.className = 'badge';
+  loadData().then(() => {
     renderDashboard();
   }).catch(err => {
     console.warn('Could not load Supabase data:', err);
-    badge.className = 'badge error';
-    badge.innerHTML = `Data unavailable <span class="badge-retry" onclick="initData()">Retry</span>`;
   });
 }
 
