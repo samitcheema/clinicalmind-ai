@@ -26,16 +26,33 @@ Tools:
 from typing import Annotated, Literal
 from fastmcp import FastMCP
 
-# ── Data adapter — swap this import for sql_adapter in Phase 2 ───────────────
-from adapter.mock_adapter import (
-    get_patients        as _get_patients,
-    get_patient_detail  as _get_patient_detail,
-    get_high_risk_patients as _get_high_risk_patients,
-    get_kpi_compliance  as _get_kpi_compliance,
-    get_overdue_assessments as _get_overdue_assessments,
-    get_crisis_events   as _get_crisis_events,
-    get_disengaged_patients as _get_disengaged_patients,
-)
+# ── Data adapter — auto-selects based on USE_SUPABASE env var ────────────────
+# Set USE_SUPABASE=true in .env (with SUPABASE_URL + SUPABASE_SERVICE_KEY)
+# to query live Supabase data. Falls back to mock data when not set.
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+if os.environ.get("USE_SUPABASE", "").lower() == "true":
+    from adapter.sql_adapter import (
+        get_patients            as _get_patients,
+        get_patient_detail      as _get_patient_detail,
+        get_high_risk_patients  as _get_high_risk_patients,
+        get_kpi_compliance      as _get_kpi_compliance,
+        get_overdue_assessments as _get_overdue_assessments,
+        get_crisis_events       as _get_crisis_events,
+        get_disengaged_patients as _get_disengaged_patients,
+    )
+else:
+    from adapter.mock_adapter import (
+        get_patients            as _get_patients,
+        get_patient_detail      as _get_patient_detail,
+        get_high_risk_patients  as _get_high_risk_patients,
+        get_kpi_compliance      as _get_kpi_compliance,
+        get_overdue_assessments as _get_overdue_assessments,
+        get_crisis_events       as _get_crisis_events,
+        get_disengaged_patients as _get_disengaged_patients,
+    )
 
 mcp = FastMCP("clinicalmind-mcp")
 
