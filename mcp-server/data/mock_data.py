@@ -630,9 +630,7 @@ def _build_patient(raw: dict, idx: int) -> dict:
         "encounter_id":    f"ENC{pid}01",
         "admit_date":      days_ago(365 + idx * 3),
         "discharge_date":  None,
-        "encounter_type":  "ACT Community" if raw["svc"] == "ACT" else "CSP Outpatient",
-        "pes_flag":        ssrs_risk == "High",
-        "cis_flag":        phq9_total >= 15,
+        "encounter_type":  "ACT Community" if raw["svc"] == "ACT" else "CSP Outpatient"
     }]
 
     # Contacts

@@ -110,8 +110,6 @@ CREATE TABLE encounters (
     admit_date      DATE,
     discharge_date  DATE,
     encounter_type  TEXT,
-    pes_flag        BOOLEAN DEFAULT FALSE,
-    cis_flag        BOOLEAN DEFAULT FALSE,
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 

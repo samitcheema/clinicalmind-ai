@@ -602,9 +602,7 @@ def _build_bundle(idx: int, rng: random.Random, fake: Faker) -> dict:
                 "encounter_id":   f"ENC{pid}01",
                 "admit_date":     admit_date,
                 "discharge_date": None,
-                "encounter_type": "CSP Outpatient" if svc == "CSP" else "ACT Community",
-                "pes_flag":       ssrs_risk == "High",
-                "cis_flag":       phq9_total >= 15,
+                "encounter_type": "CSP Outpatient" if svc == "CSP" else "ACT Community"
             }],
             "contacts": contacts,
         },
