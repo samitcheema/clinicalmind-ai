@@ -1,6 +1,6 @@
 # ClinicalMind AI
 
-A behavioral health data pipeline with an AI query layer — ingests FHIR R4 patient data from Synthea, normalizes it into a PostgreSQL schema, and exposes it to Claude via the Model Context Protocol so clinicians can ask questions in plain English.
+A behavioral health data pipeline with an AI query layer — ingests FHIR R4 patient data from Synthea, normalizes it into a PostgreSQL schema, and exposes it to Claude via the Model Context Protocol so clinicians can ask questions.
 
 **Live demo:** `https://samitcheema.github.io/clinicalmind-ai/`
 
