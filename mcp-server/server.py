@@ -1,9 +1,8 @@
 """
 ClinicalMind AI — FastMCP Server
 
-Exposes behavioral health pipeline data as 7 discrete MCP tools.
-Claude calls these tools on demand — fetching only the data needed to
-answer each clinical question rather than injecting the entire cohort.
+Exposes behavioral health pipeline data as 7 discrete MCP tools,
+1 resource, and 3 reusable prompts.
 
 Transport: stdio  (compatible with Claude Desktop, Claude Code, and the
                    React chat UI via the MCP client library)
@@ -21,6 +20,15 @@ Tools:
   get_overdue_assessments    — patients past their assessment due dates
   get_crisis_events          — crisis episodes within a date window
   get_disengaged_patients    — no contact beyond a configurable threshold
+
+Resources:
+  clinicalmind://cohort-summary  — live cohort snapshot (risk breakdown,
+                                   KPI compliance, crisis count)
+
+Prompts:
+  daily-huddle       — high-risk patients + overdue assessments today
+  crisis-review      — crisis events in the last 7 days
+  disengagement-check — patients with no contact in 30+ days
 """
 
 from typing import Annotated, Literal
@@ -189,6 +197,71 @@ def get_disengaged_patients(
     day threshold. Sorted by longest gap first. Default threshold is 30 days.
     Flags overlapping high-risk patients and recent crisis events."""
     return _get_disengaged_patients(threshold_days=threshold_days or 30)
+
+
+# ── Resource: cohort-summary ──────────────────────────────────────────────────
+
+@mcp.resource("clinicalmind://cohort-summary")
+def cohort_summary() -> str:
+    """Live snapshot of the cohort — risk breakdown, KPI compliance rate,
+    and recent crisis count. Claude can read this as background context
+    without issuing a tool call."""
+    patients = _get_patients()
+    total    = len(patients)
+
+    risk_counts = {"High": 0, "Moderate": 0, "Low": 0}
+    for p in patients:
+        risk_counts[p["risk_level"]] = risk_counts.get(p["risk_level"], 0) + 1
+
+    kpi    = _get_kpi_compliance()
+    crisis = _get_crisis_events(window_days=7)
+
+    kpi_status = "meets target" if kpi["meets_target"] else f"{kpi['gap_to_target']}pp below target"
+
+    return (
+        f"Cohort snapshot — {total} patients total\n"
+        f"Risk: {risk_counts['High']} High / {risk_counts['Moderate']} Moderate / {risk_counts['Low']} Low\n"
+        f"KPI compliance: {kpi['overall_compliance_pct']}% overall (target {kpi['target_pct']}%, {kpi_status})\n"
+        f"Crisis events (last 7 days): {crisis['total_events']} across {crisis['unique_patients']} patients"
+    )
+
+
+# ── Prompts ───────────────────────────────────────────────────────────────────
+
+@mcp.prompt()
+def daily_huddle() -> str:
+    """Morning huddle prompt — surfaces high-risk patients and overdue
+    assessments so a case manager can prioritize the day."""
+    return (
+        "Give me a morning huddle summary:\n"
+        "1. Who are my high-risk patients right now? List them with PHQ-9 score and SSRS risk.\n"
+        "2. Which patients have overdue assessments? Group by assessment type.\n"
+        "3. Flag anyone who is both high-risk and has overdue assessments."
+    )
+
+
+@mcp.prompt()
+def crisis_review() -> str:
+    """Weekly crisis review prompt — surfaces all crisis events in the last
+    7 days with patient context."""
+    return (
+        "Run a crisis review for the past 7 days:\n"
+        "1. List all crisis events with patient name, crisis type, and date.\n"
+        "2. For each patient with a crisis event, include their current PHQ-9 score and SSRS risk level.\n"
+        "3. Flag any patients who have had a crisis but no contact since the event."
+    )
+
+
+@mcp.prompt()
+def disengagement_check() -> str:
+    """Disengagement check prompt — identifies patients who have gone without
+    contact for 30+ days, prioritized by risk level."""
+    return (
+        "Run a disengagement check:\n"
+        "1. List all patients with no contact in the last 30 days, sorted by days since last contact.\n"
+        "2. Flag which of these patients are high-risk (PHQ-9 ≥15 or SSRS High).\n"
+        "3. Recommend a re-engagement priority order."
+    )
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

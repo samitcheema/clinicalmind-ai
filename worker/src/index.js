@@ -1,27 +1,40 @@
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'content-type, x-api-key, anthropic-version, anthropic-dangerous-allow-browser',
-  'Access-Control-Max-Age': '86400',
-};
+const ALLOWED_ORIGIN = 'https://samitcheema.github.io';
 
-function addCors(headers) {
-  for (const [k, v] of Object.entries(CORS_HEADERS)) headers.set(k, v);
+const ALLOWED_TABLES = new Set(['patients']);
+
+function corsHeaders(origin) {
+  const allowed = origin === ALLOWED_ORIGIN ? origin : ALLOWED_ORIGIN;
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'content-type, x-api-key, anthropic-version, anthropic-dangerous-allow-browser',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+function addCors(headers, origin) {
+  for (const [k, v] of Object.entries(corsHeaders(origin))) headers.set(k, v);
 }
 
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get('Origin') || '';
+    const CORS = corsHeaders(origin);
+
     try {
       const url = new URL(request.url);
 
       // Handle CORS preflight
       if (request.method === 'OPTIONS') {
-        return new Response(null, { status: 204, headers: CORS_HEADERS });
+        return new Response(null, { status: 204, headers: CORS });
       }
 
       // Supabase REST proxy: GET /supabase/<table>?<postgrest-params>
       if (url.pathname.startsWith('/supabase/')) {
-        const table = url.pathname.slice('/supabase/'.length);
+        const table = url.pathname.slice('/supabase/'.length).split('/')[0];
+        if (!ALLOWED_TABLES.has(table)) {
+          return new Response('Forbidden', { status: 403, headers: CORS });
+        }
         const supaUrl = `${env.SUPABASE_URL}/rest/v1/${table}${url.search}`;
         const upstream = await fetch(supaUrl, {
           headers: {
@@ -32,13 +45,13 @@ export default {
           },
         });
         const resHeaders = new Headers(upstream.headers);
-        addCors(resHeaders);
+        addCors(resHeaders, origin);
         return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
       }
 
       // Claude API proxy
       if (request.method !== 'POST') {
-        return new Response('Use POST', { status: 405, headers: CORS_HEADERS });
+        return new Response('Use POST', { status: 405, headers: CORS });
       }
 
       const headers = new Headers();
@@ -54,13 +67,13 @@ export default {
       });
 
       const resHeaders = new Headers(response.headers);
-      addCors(resHeaders);
+      addCors(resHeaders, origin);
 
       return new Response(response.body, { status: response.status, headers: resHeaders });
-    } catch (err) {
-      return new Response(JSON.stringify({ error: err.message }), {
+    } catch (_) {
+      return new Response(JSON.stringify({ error: 'Internal server error' }), {
         status: 500,
-        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+        headers: { ...CORS, 'Content-Type': 'application/json' },
       });
     }
   }
