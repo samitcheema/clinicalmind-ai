@@ -19,7 +19,13 @@ from __future__ import annotations
 
 
 import json
+import re
 from datetime import datetime
+
+def _clean(s: str) -> str:
+    """Strip trailing digit suffixes Synthea appends to name tokens (e.g. 'Jones123' → 'Jones')."""
+    return " ".join(re.sub(r"\d+$", "", w) for w in s.split()).strip()
+
 
 # ── LOINC & coding constants ──────────────────────────────────────────────────
 
@@ -122,7 +128,7 @@ def _parse_fhir(bundle: dict) -> dict:
     pid = pat.get("id", bundle.get("id", "UNKNOWN"))
 
     name_obj = pat.get("name", [{}])[0]
-    full_name = " ".join(name_obj.get("given", [])) + " " + name_obj.get("family", "")
+    full_name = _clean(" ".join(name_obj.get("given", [])) + " " + name_obj.get("family", ""))
     dob       = pat.get("birthDate", "")
     county    = pat.get("address", [{}])[0].get("district", "")
 
@@ -144,10 +150,12 @@ def _parse_fhir(bundle: dict) -> dict:
         prac = by_type.get("Practitioner", [{}])[0] if by_type.get("Practitioner") else {}
     if not prov_id:
         prov_id = prac.get("id", "")
-    prov_name = (prac.get("name", [{}])[0].get("text")
-                 or " ".join(prac.get("name", [{}])[0].get("given", []) +
-                             [prac.get("name", [{}])[0].get("family", "")])
-                 or prov_id)
+    prov_name = _clean(
+        prac.get("name", [{}])[0].get("text")
+        or " ".join(prac.get("name", [{}])[0].get("given", []) +
+                    [prac.get("name", [{}])[0].get("family", "")])
+        or prov_id
+    )
     prov_team = _ext_value(prac.get("extension", []), "team") or ""
 
     # Encounter-based provider fallback (Synthea puts practitioners in a
@@ -160,11 +168,12 @@ def _parse_fhir(bundle: dict) -> dict:
                 disp  = indiv.get("display", "")
                 if "npi|" in ref:
                     prov_id   = "npi-" + ref.split("npi|")[-1]
-                    prov_name = prov_name or disp or prov_id
+                    prov_name = prov_name or _clean(disp) or prov_id
                     break
                 elif disp:
-                    prov_id   = disp.replace(" ", "_")[:30]
-                    prov_name = prov_name or disp
+                    clean_disp = _clean(disp)
+                    prov_id    = clean_disp.replace(" ", "_")[:30]
+                    prov_name  = prov_name or clean_disp
                     break
             if prov_id:
                 break
