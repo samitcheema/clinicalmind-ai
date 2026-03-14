@@ -1,6 +1,6 @@
 # ClinicalMind AI
 
-A behavioral health data pipeline with an AI query layer — ingests real FHIR R4 patient data, normalizes it into a PostgreSQL schema, and exposes it to Claude via the Model Context Protocol so clinicians can ask questions in plain English.
+A behavioral health data pipeline with an AI query layer — ingests FHIR R4 patient data from Synthea, normalizes it into a PostgreSQL schema, and exposes it to Claude via the Model Context Protocol so clinicians can ask questions in plain English.
 
 **Live demo:** `https://samitcheema.github.io/clinicalmind-ai/`
 
@@ -8,7 +8,7 @@ A behavioral health data pipeline with an AI query layer — ingests real FHIR R
 
 ## What It Does
 
-1. **ETL pipeline** ingests real [Synthea](https://github.com/synthetichealth/synthea)-generated FHIR R4 bundles, parses 15+ resource types, and loads normalized clinical data into Supabase
+1. **ETL pipeline** ingests [Synthea](https://github.com/synthetichealth/synthea)-generated FHIR R4 bundles, parses 15+ resource types, and loads normalized clinical data into Supabase
 2. **MCP server** wraps the database with 7 typed tools that Claude calls based on the question — no dashboards, no SQL
 3. **Browser demo** on GitHub Pages, served through a Cloudflare Worker proxy, lets anyone interact with live data using their own Anthropic API key
 
@@ -24,7 +24,7 @@ A behavioral health data pipeline with an AI query layer — ingests real FHIR R
 ## Architecture
 
 ```
-Synthea FHIR output (real EHR-format bundles)
+Synthea FHIR output (standard EHR-format bundles)
       │
       │  import_synthea.py
       ▼
@@ -68,10 +68,10 @@ The pipeline (`pipeline/`) is the core of the project. Every stage is independen
 
 ### Real FHIR Data (Synthea)
 
-The pipeline is designed to ingest real-world FHIR R4 format, not synthetic shortcut data. Running against Synthea output exercises the full FHIR parse path (`fast-path: 0, full-parse: 64`):
+The pipeline ingests standards-compliant FHIR R4 format, exercising the full parse path on every record (`fast-path: 0, full-parse: 64`):
 
 ```bash
-# Generate 100 synthetic patients with real FHIR R4 output
+# Generate 100 patients with FHIR R4 output
 java -jar synthea-with-dependencies.jar -p 100 --exporter.fhir.export true
 
 # Import into the pipeline
@@ -119,7 +119,7 @@ pip install -r requirements.txt
 
 python orchestrator.py --dry-run          # 60 synthetic patients, no DB writes
 python orchestrator.py --count 100        # 100 synthetic patients → Supabase
-python import_synthea.py /path/to/fhir   # real Synthea FHIR data → Supabase
+python import_synthea.py /path/to/fhir   # Synthea FHIR data → Supabase
 ```
 
 ---
@@ -220,7 +220,7 @@ clinicalmind-ai/
 | AI | Claude (`claude-opus-4-6`) via Anthropic API |
 | MCP framework | [FastMCP](https://github.com/jlowin/fastmcp) (Python, stdio) |
 | ETL | Python — psycopg2, supabase-py, python-dotenv |
-| FHIR data | [Synthea](https://github.com/synthetichealth/synthea) — real FHIR R4 bundles |
+| FHIR data | [Synthea](https://github.com/synthetichealth/synthea) — FHIR R4 bundles |
 | Database | Supabase (PostgreSQL 15+) with row-level security |
 | Edge proxy | Cloudflare Workers |
 | Frontend | Vanilla JS — GitHub Pages |
