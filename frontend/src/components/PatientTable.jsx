@@ -42,7 +42,7 @@ export default function PatientTable({ patients }) {
       const cmp = typeof va==='string' ? va.localeCompare(vb) : (va-vb);
       return sort.dir==='asc' ? cmp : -cmp;
     });
-  }, [patients, search, riskFilter, sort]);
+  }, [patients, search, sort]);
 
   function SortTh({ col, children }) {
     const isSorted = sort.col === col;
