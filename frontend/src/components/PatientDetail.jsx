@@ -40,7 +40,6 @@ export default function PatientDetail({ patient: p }) {
           </div>
         </div>
         <div className="dh-badges">
-          <span className={`risk-badge ${p.risk_level}`}>{p.risk_level} Risk</span>
           <span className={`ssrs-badge ${p.ssrs.risk_level}`}>SSRS {p.ssrs.risk_level}</span>
           {p.phq9.si_present && <span className="si-badge">⚠ SI Present</span>}
         </div>

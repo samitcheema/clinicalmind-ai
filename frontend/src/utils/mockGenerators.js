@@ -25,13 +25,13 @@ export function fmtDate(d) {
 }
 
 const ENC_TYPES = [
-  { type:'Outpatient',          dept:'BH Ambulatory Clinic',    isPES:false,isCIS:false, color:'blue'   },
-  { type:'Outpatient',          dept:'NBH Outpatient',           isPES:false,isCIS:false, color:'blue'   },
-  { type:'Phone Contact',       dept:'Care Management',          isPES:false,isCIS:false, color:'slate'  },
-  { type:'Treatment Plan',      dept:'BH Care Coordination',     isPES:false,isCIS:false, color:'green'  },
-  { type:'Crisis Intervention', dept:'GHS Crisis Interv Svcs',  isPES:false,isCIS:true,  color:'amber'  },
-  { type:'PES Visit',           dept:'GHS Emergency',            isPES:true, isCIS:false, color:'red'    },
-  { type:'Inpatient',           dept:'BH Inpatient Unit',        isPES:false,isCIS:false, color:'purple' },
+  { type:'Outpatient',          dept:'Midtown Behavioral Health',   isPES:false, isCIS:false, color:'blue'   },
+  { type:'Outpatient',          dept:'Westside Recovery Clinic',    isPES:false, isCIS:false, color:'blue'   },
+  { type:'Phone Contact',       dept:'Community Care Management',   isPES:false, isCIS:false, color:'slate'  },
+  { type:'Treatment Plan',      dept:'Integrated Care Team',        isPES:false, isCIS:false, color:'green'  },
+  { type:'Crisis Intervention', dept:'Mobile Crisis Response',      isPES:false, isCIS:true,  color:'amber'  },
+  { type:'PES Visit',           dept:'Psychiatric Emergency Unit',  isPES:true,  isCIS:false, color:'red'    },
+  { type:'Inpatient',           dept:'Behavioral Health Inpatient', isPES:false, isCIS:false, color:'purple' },
 ];
 const STATUSES = ['Completed','Completed','Completed','Completed','Completed','No Show','Canceled','Reschedule'];
 

@@ -18,8 +18,8 @@ function computeStats(patients) {
   const overdueTotal = KPI_NAMES.reduce((s,k)=>s+kpiStats[k].overdue,0);
   const overallPct = Math.round((totalKpis-overdueTotal)/totalKpis*100);
 
-  const cutoff28 = offsetDate(TODAY,-28);
-  const openCrises = patients.reduce((n,p)=>n+p.crisis_events.filter(e=>e.date>=cutoff28&&!e.resolved).length,0);
+  const cutoff7 = offsetDate(TODAY,-7);
+  const activeCrisis = patients.filter(p=>p.crisis_events.some(e=>e.date>=cutoff7&&!e.resolved)).length;
 
   const alerts = [];
   for (const p of patients) {
@@ -31,7 +31,7 @@ function computeStats(patients) {
       alerts.push({ name:p.name, reason:`PHQ-9 score ${p.phq9.score} (Severe)`, level:'amber', id:p.id });
   }
 
-  return { total, byRisk, kpiStats, overallPct, openCrises, alerts };
+  return { total, byRisk, kpiStats, overallPct, activeCrisis, alerts };
 }
 
 export default function Dashboard({ patients, loading }) {
@@ -48,7 +48,7 @@ export default function Dashboard({ patients, loading }) {
   }
 
   const kpiColor = s.overallPct >= KPI_TARGET ? 'green' : 'amber';
-  const crisisColor = s.openCrises > 0 ? 'red' : 'green';
+  const crisisColor = s.activeCrisis > 0 ? 'red' : 'green';
 
   return (
     <div className="dashboard-pane">
@@ -76,9 +76,9 @@ export default function Dashboard({ patients, loading }) {
           </div>
           <div className={`stat-card ${crisisColor}`}>
             <span className="sc-icon">🚨</span>
-            <div className="sc-label">Open Crises (28d)</div>
-            <div className={`sc-value ${crisisColor}`}>{s.openCrises}</div>
-            <div className="sc-sub">Unresolved events</div>
+            <div className="sc-label">Active Crisis</div>
+            <div className={`sc-value ${crisisColor}`}>{s.activeCrisis}</div>
+            <div className="sc-sub">Admitted to crisis unit</div>
           </div>
         </div>
 

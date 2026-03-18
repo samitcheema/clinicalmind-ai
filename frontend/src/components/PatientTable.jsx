@@ -1,12 +1,11 @@
 import { useState, useMemo } from 'react';
-import { KPI_NAMES, RISK_ORDER } from '../utils/dataTransform.js';
+import { KPI_NAMES } from '../utils/dataTransform.js';
 import { daysBetween } from '../utils/tools.js';
 import PatientDetail from './PatientDetail.jsx';
 
 export default function PatientTable({ patients }) {
   const [search, setSearch] = useState('');
-  const [riskFilter, setRiskFilter] = useState('');
-  const [sort, setSort] = useState({ col:'risk', dir:'desc' });
+  const [sort, setSort] = useState({ col:'phq9', dir:'desc' });
   const [expanded, setExpanded] = useState(new Set());
 
   function toggleExpand(id) {
@@ -27,16 +26,14 @@ export default function PatientTable({ patients }) {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     let pts = patients.filter(p => {
-      if (riskFilter && p.risk_level !== riskFilter) return false;
       if (q && !p.name.toLowerCase().includes(q) && !p.id.toLowerCase().includes(q) && !p.provider.toLowerCase().includes(q)) return false;
       return true;
     });
     return pts.slice().sort((a,b) => {
       let va, vb;
       switch(sort.col) {
-        case 'name':    va=a.name;                       vb=b.name;                      break;
-        case 'risk':    va=RISK_ORDER[a.risk_level]??2;  vb=RISK_ORDER[b.risk_level]??2; break;
-        case 'phq9':    va=a.phq9.score;                 vb=b.phq9.score;                break;
+        case 'name':    va=a.name;          vb=b.name;          break;
+        case 'phq9':    va=a.phq9.score;    vb=b.phq9.score;    break;
         case 'contact': va=a.last_contact_date||'';      vb=b.last_contact_date||'';     break;
         case 'overdue': va=KPI_NAMES.filter(k=>a.kpis[k].overdue).length;
                         vb=KPI_NAMES.filter(k=>b.kpis[k].overdue).length; break;
@@ -66,12 +63,6 @@ export default function PatientTable({ patients }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
         />
-        <select className="risk-filter" value={riskFilter} onChange={e => setRiskFilter(e.target.value)}>
-          <option value="">All risk levels</option>
-          <option value="High">High only</option>
-          <option value="Moderate">Moderate only</option>
-          <option value="Low">Low only</option>
-        </select>
         <span className="pt-count">{filtered.length} of {patients.length} patients</span>
       </div>
       <div className="table-wrap">
@@ -80,7 +71,6 @@ export default function PatientTable({ patients }) {
             <tr>
               <th style={{width:32}} className="no-sort"></th>
               <SortTh col="name">Patient</SortTh>
-              <SortTh col="risk">Risk</SortTh>
               <th>Provider</th>
               <SortTh col="phq9">PHQ-9</SortTh>
               <th>SSRS</th>
@@ -90,7 +80,7 @@ export default function PatientTable({ patients }) {
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr className="no-data"><td colSpan={8}>No patients match the current filter.</td></tr>
+              <tr className="no-data"><td colSpan={7}>No patients match the current filter.</td></tr>
             ) : filtered.map(p => {
               const isExp = expanded.has(p.id);
               const days = daysBetween(p.last_contact_date);
@@ -112,7 +102,6 @@ export default function PatientTable({ patients }) {
                     <span className="pt-name">{p.name}</span>
                     <span className="pt-id">{p.id}</span>
                   </td>
-                  <td><span className={`risk-badge ${p.risk_level}`}>{p.risk_level}</span></td>
                   <td>{p.provider}</td>
                   <td><span className={`phq-score ${phqCls}`}>{phqLbl}</span></td>
                   <td><span className={`ssrs-badge ${p.ssrs.risk_level}`}>{p.ssrs.risk_level}</span></td>
@@ -126,7 +115,7 @@ export default function PatientTable({ patients }) {
                 </tr>,
                 isExp && (
                   <tr key={`detail-${p.id}`} className="detail-row">
-                    <td colSpan={8}>
+                    <td colSpan={7}>
                       <PatientDetail patient={p} />
                     </td>
                   </tr>
