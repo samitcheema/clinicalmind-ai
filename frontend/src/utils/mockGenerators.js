@@ -109,7 +109,7 @@ export function generateCSSRS(p, rand) {
   const plan = p.ssrs?.plan_present || false;
   const method = p.ssrs?.method_present || false;
   const si = p.phq9?.si_present || false;
-  if (r === 'High' || si) return { wish_dead:'Yes', suicidal_thoughts:'Yes', suicidal_intent:plan?'Yes':'No', suicidal_with_plan:plan?'Yes':'No', suicidal_method:method?'Yes':'No', history_suicide:rand()>.5?'Yes':'No' };
-  if (r === 'Moderate') return { wish_dead:'Yes', suicidal_thoughts:'Yes', suicidal_intent:'No', suicidal_with_plan:'No', suicidal_method:'No', history_suicide:rand()>.7?'Yes':'No' };
-  return { wish_dead:rand()>.85?'Yes':'No', suicidal_thoughts:'No', suicidal_intent:'No', suicidal_with_plan:'No', suicidal_method:'No', history_suicide:'No' };
+  if (r === 'High' || si) return { passive_ideation:'Yes', active_ideation:'Yes', ideation_with_intent:plan?'Yes':'No', ideation_with_plan:plan?'Yes':'No', ideation_with_method:method?'Yes':'No', prior_suicidal_behavior:rand()>.5?'Yes':'No' };
+  if (r === 'Moderate') return { passive_ideation:'Yes', active_ideation:'Yes', ideation_with_intent:'No', ideation_with_plan:'No', ideation_with_method:'No', prior_suicidal_behavior:rand()>.7?'Yes':'No' };
+  return { passive_ideation:rand()>.85?'Yes':'No', active_ideation:'No', ideation_with_intent:'No', ideation_with_plan:'No', ideation_with_method:'No', prior_suicidal_behavior:'No' };
 }

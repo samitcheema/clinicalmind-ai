@@ -133,8 +133,8 @@ _DDL: list[str] = [
         admit_date      DATE,
         discharge_date  DATE,
         encounter_type  TEXT,
-        pes_flag        BOOLEAN DEFAULT FALSE,
-        cis_flag        BOOLEAN DEFAULT FALSE,
+        is_psychiatric_emergency BOOLEAN DEFAULT FALSE,
+        is_crisis_intervention    BOOLEAN DEFAULT FALSE,
         created_at      TIMESTAMPTZ DEFAULT NOW()
     )
     """,
@@ -217,6 +217,174 @@ _DDL: list[str] = [
         error_message        TEXT
     )
     """,
+
+    # ── assessments_dla20 (Daily Living Activities — 20 domains, 1–4 scale) ──
+    """
+    CREATE TABLE IF NOT EXISTS assessments_dla20 (
+        id                   UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        patient_id           TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
+        assessment_date      DATE NOT NULL,
+        assessment_version   TEXT DEFAULT 'clinician_rated',
+        assessor_id          TEXT REFERENCES providers(provider_id),
+        family_relationships NUMERIC(3,1),
+        problem_solving      NUMERIC(3,1),
+        nutrition            NUMERIC(3,1),
+        managing_money       NUMERIC(3,1),
+        managing_time        NUMERIC(3,1),
+        safety               NUMERIC(3,1),
+        communication        NUMERIC(3,1),
+        dress                NUMERIC(3,1),
+        housing_stability    NUMERIC(3,1),
+        grooming             NUMERIC(3,1),
+        personal_hygiene     NUMERIC(3,1),
+        behavior_norms       NUMERIC(3,1),
+        coping_skills        NUMERIC(3,1),
+        productivity         NUMERIC(3,1),
+        sexuality            NUMERIC(3,1),
+        social_network       NUMERIC(3,1),
+        community_resources  NUMERIC(3,1),
+        leisure              NUMERIC(3,1),
+        alcohol_drug_use     NUMERIC(3,1),
+        health_practices     NUMERIC(3,1),
+        total_score          NUMERIC(5,2),
+        composite_score      NUMERIC(4,2),
+        difference_from_last NUMERIC(5,2),
+        items_rated          INT DEFAULT 20,
+        interpretation_level TEXT,
+        created_at           TIMESTAMPTZ DEFAULT NOW()
+    )
+    """,
+
+    # ── assessments_pain (enhanced pain assessment — NRS + interference) ───
+    """
+    CREATE TABLE IF NOT EXISTS assessments_pain (
+        id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        patient_id          TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
+        assessment_date     DATE NOT NULL,
+        scale_type          TEXT DEFAULT 'NRS',
+        pain_score          NUMERIC(4,1),
+        pain_locations      JSONB,
+        pain_quality        TEXT[],
+        onset_date          DATE,
+        duration_type       TEXT,
+        frequency_pattern   TEXT,
+        interference_score  NUMERIC(3,1),
+        affected_activities TEXT[],
+        alleviating_factors TEXT[],
+        aggravating_factors TEXT[],
+        associated_symptoms TEXT[],
+        pain_source_value   TEXT,
+        created_at          TIMESTAMPTZ DEFAULT NOW()
+    )
+    """,
+
+    # ── prescriptions (FHIR MedicationRequest — behavioral health enhanced) ─
+    """
+    CREATE TABLE IF NOT EXISTS prescriptions (
+        id                        UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        patient_id                TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
+        medication_name           TEXT NOT NULL,
+        drug_class                TEXT,
+        psychotropic_class        TEXT,
+        status                    TEXT DEFAULT 'active',
+        dosage                    TEXT,
+        dose_value                NUMERIC(8,2),
+        dose_unit                 TEXT,
+        frequency                 TEXT,
+        route                     TEXT DEFAULT 'PO',
+        as_needed                 BOOLEAN DEFAULT FALSE,
+        days_supply               INT,
+        refills_authorized        INT,
+        refills_remaining         INT,
+        ordered_date              DATE,
+        start_date                DATE,
+        end_date                  DATE,
+        is_lai                    BOOLEAN DEFAULT FALSE,
+        lai_interval_days         INT,
+        last_injection_date       DATE,
+        next_injection_date       DATE,
+        adherence_concern         TEXT DEFAULT 'none',
+        refill_pattern            TEXT,
+        prescribing_provider_id   TEXT REFERENCES providers(provider_id),
+        prescribing_provider_name TEXT,
+        created_at                TIMESTAMPTZ DEFAULT NOW()
+    )
+    """,
+
+    # ── inpatient_admissions (FHIR Encounter — inpatient BH specific) ───────
+    """
+    CREATE TABLE IF NOT EXISTS inpatient_admissions (
+        id                     UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        patient_id             TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
+        encounter_id           TEXT,
+        admission_date         DATE NOT NULL,
+        discharge_date         DATE,
+        length_of_stay_days    INT,
+        ward                   TEXT,
+        ward_specialty         TEXT,
+        service_type           TEXT DEFAULT 'psychiatric',
+        admission_type         TEXT DEFAULT 'voluntary',
+        legal_hold_type        TEXT,
+        admit_source           TEXT,
+        discharge_disposition  TEXT,
+        restraint_used         BOOLEAN DEFAULT FALSE,
+        seclusion_used         BOOLEAN DEFAULT FALSE,
+        out_of_area            BOOLEAN DEFAULT FALSE,
+        readmitted_within_30d  BOOLEAN DEFAULT FALSE,
+        primary_diagnosis_code TEXT,
+        primary_diagnosis_desc TEXT,
+        created_at             TIMESTAMPTZ DEFAULT NOW()
+    )
+    """,
+
+    # ── crisis_safety_plans (Stanley-Brown Safety Planning Intervention) ────
+    """
+    CREATE TABLE IF NOT EXISTS crisis_safety_plans (
+        id                      UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        patient_id              TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
+        plan_status             TEXT DEFAULT 'active',
+        crisis_risk_level       TEXT,
+        created_date            DATE NOT NULL,
+        last_reviewed_date      DATE,
+        next_review_date        DATE,
+        created_by_provider_id  TEXT REFERENCES providers(provider_id),
+        warning_signs           JSONB,
+        internal_coping         JSONB,
+        social_distractions     JSONB,
+        social_support_contacts JSONB,
+        professional_contacts   JSONB,
+        means_restriction       JSONB,
+        risk_factors            TEXT[],
+        protective_factors      TEXT[],
+        patient_acknowledged    BOOLEAN DEFAULT FALSE,
+        acknowledgment_date     DATE,
+        created_at              TIMESTAMPTZ DEFAULT NOW()
+    )
+    """,
+
+    # ── ai_risk_scores (Claude-computed risk assessments) ────────────────────
+    """
+    CREATE TABLE IF NOT EXISTS ai_risk_scores (
+        id                 UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+        patient_id         TEXT REFERENCES patients(patient_id) ON DELETE CASCADE,
+        scored_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        risk_level         TEXT NOT NULL,
+        propensity_score   FLOAT NOT NULL,
+        early_warning      BOOLEAN DEFAULT FALSE,
+        velocity_concern   BOOLEAN DEFAULT FALSE,
+        top_factors        JSONB,
+        reasoning          TEXT,
+        recommended_action TEXT,
+        model_used         TEXT,
+        created_at         TIMESTAMPTZ DEFAULT NOW()
+    )
+    """,
+]
+
+# ── ALTER TABLE: add columns to existing tables (idempotent) ─────────────────
+_ALTER: list[str] = [
+    "ALTER TABLE encounters ADD COLUMN IF NOT EXISTS appt_missed BOOLEAN DEFAULT FALSE",
+    "ALTER TABLE encounters ADD COLUMN IF NOT EXISTS appt_status TEXT",
 ]
 
 # ── RLS enablement + policies ─────────────────────────────────────────────────
@@ -226,6 +394,8 @@ _DDL: list[str] = [
 _PRIVATE_TABLES = [
     "providers", "patients",
     "assessments_phq9", "assessments_gad7", "assessments_whodas", "assessments_ssrs",
+    "assessments_dla20", "assessments_pain",
+    "prescriptions", "inpatient_admissions", "crisis_safety_plans", "ai_risk_scores",
     "encounters", "contacts", "crisis_events", "kpi_compliance", "pipeline_runs",
 ]
 
@@ -287,7 +457,7 @@ def run(database_url: str) -> StageResult:
         conn.autocommit = True
         cur = conn.cursor()
 
-        for stmt in all_stmts:
+        for stmt in all_stmts + _ALTER:
             cur.execute(stmt)
             executed += 1
 

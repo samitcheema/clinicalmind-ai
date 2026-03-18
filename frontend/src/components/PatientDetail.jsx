@@ -4,12 +4,12 @@ import { fmtDate, TODAY } from '../utils/mockGenerators.js';
 import EncounterTimeline from './EncounterTimeline.jsx';
 
 const CSSRS_ITEMS = [
-  { label:'Wish to be Dead',    key:'wish_dead'          },
-  { label:'Suicidal Thoughts',  key:'suicidal_thoughts'  },
-  { label:'Suicidal Intent',    key:'suicidal_intent'    },
-  { label:'Intent with Plan',   key:'suicidal_with_plan' },
-  { label:'With Method',        key:'suicidal_method'    },
-  { label:'History of Attempt', key:'history_suicide'    },
+  { label:'Passive Ideation',        key:'passive_ideation'        },
+  { label:'Active Ideation',         key:'active_ideation'         },
+  { label:'Ideation with Intent',    key:'ideation_with_intent'    },
+  { label:'Ideation with Plan',      key:'ideation_with_plan'      },
+  { label:'Ideation with Method',    key:'ideation_with_method'    },
+  { label:'Prior Suicidal Behavior', key:'prior_suicidal_behavior' },
 ];
 
 export default function PatientDetail({ patient: p }) {
