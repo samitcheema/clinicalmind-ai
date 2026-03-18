@@ -1,4 +1,5 @@
 import { hashStr, mkRand, generateEncounters, generateDiagnoses, generateMedications, generateCSSRS } from './mockGenerators.js';
+import { getMockPatients } from './mockSeeds.js';
 
 export const KPI_NAMES   = ['bha','sra','aims','whodas','phq9','beh_tp','beh_csp'];
 export const KPI_DISPLAY = { bha:'BHA', sra:'SRA', aims:'AIMS', whodas:'WHODAS', phq9:'PHQ-9', beh_tp:'BEH-TP', beh_csp:'BEH-CSP' };
@@ -65,8 +66,12 @@ export async function loadPatients() {
     'crisis_events(event_id,crisis_date,crisis_type,within_7_days,within_28_days,days_since)',
   ].join(',');
 
-  const res = await fetch(`${PROXY}supabase/patients?select=${select}&order=patient_id`, { headers: { Accept:'application/json' } });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const rows = await res.json();
-  return rows.map(transformPatient);
+  try {
+    const res = await fetch(`${PROXY}supabase/patients?select=${select}&order=patient_id`, { headers: { Accept:'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = await res.json();
+    if (rows.length > 0) return rows.map(transformPatient);
+  } catch (_) { /* fall through to demo data */ }
+
+  return getMockPatients();
 }
