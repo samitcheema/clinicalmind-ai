@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { KPI_NAMES, KPI_DISPLAY, KPI_TARGET } from '../utils/dataTransform.js';
+import { KPI_NAMES, KPI_DISPLAY } from '../utils/dataTransform.js';
 import { offsetDate, TODAY, fmtDate } from '../utils/mockGenerators.js';
 import PatientTable from './PatientTable.jsx';
 
@@ -47,7 +47,7 @@ export default function Dashboard({ patients, loading }) {
     );
   }
 
-  const kpiColor = s.overallPct >= KPI_TARGET ? 'green' : 'amber';
+  const kpiColor = s.overallPct >= 75 ? 'green' : 'amber';
   const crisisColor = s.activeCrisis > 0 ? 'red' : 'green';
 
   return (
@@ -72,7 +72,7 @@ export default function Dashboard({ patients, loading }) {
             <span className="sc-icon">📋</span>
             <div className="sc-label">KPI Compliance</div>
             <div className={`sc-value ${kpiColor}`}>{s.overallPct}%</div>
-            <div className="sc-sub">Target: {KPI_TARGET}%</div>
+            <div className="sc-sub">Target: 75%</div>
           </div>
           <div className={`stat-card ${crisisColor}`}>
             <span className="sc-icon">🚨</span>
@@ -89,7 +89,7 @@ export default function Dashboard({ patients, loading }) {
             <div className="panel-title">KPI Compliance vs 75% Target</div>
             {KPI_NAMES.map(k => {
               const pct = s.kpiStats[k].pct;
-              const cls = pct >= KPI_TARGET ? 'meets' : 'below';
+              const cls = pct >= 75 ? 'meets' : 'below';
               return (
                 <div key={k} className="kpi-row">
                   <span className="kpi-name">{KPI_DISPLAY[k]}</span>

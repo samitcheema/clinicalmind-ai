@@ -1,4 +1,4 @@
-import { KPI_NAMES, KPI_TARGET, PHQ9_ITEMS } from './dataTransform.js';
+import { KPI_NAMES, PHQ9_ITEMS } from './dataTransform.js';
 import { TODAY, offsetDate } from './mockGenerators.js';
 
 export function daysBetween(dateStr) {
@@ -42,11 +42,11 @@ export function getKpiCompliance(patients, { kpi_name } = {}) {
   const by_kpi = {};
   for (const n of KPI_NAMES) {
     const overdue = patients.filter(p=>p.kpis[n].overdue).length;
-    by_kpi[n] = { total:patients.length,compliant:patients.length-overdue,overdue,compliance_pct:Math.round((patients.length-overdue)/patients.length*100),meets_target:Math.round((patients.length-overdue)/patients.length*100)>=KPI_TARGET };
+    by_kpi[n] = { total:patients.length,compliant:patients.length-overdue,overdue,compliance_pct:Math.round((patients.length-overdue)/patients.length*100) };
   }
   const totalKpis=patients.length*KPI_NAMES.length, overdueTotal=KPI_NAMES.reduce((s,n)=>s+by_kpi[n].overdue,0);
   const overallPct=Math.round((totalKpis-overdueTotal)/totalKpis*100);
-  const result={overall_compliance_pct:overallPct,overall_meets_target:overallPct>=KPI_TARGET,target_pct:KPI_TARGET,total_patients:patients.length};
+  const result={overall_compliance_pct:overallPct,total_patients:patients.length};
   if (kpi_name){result.kpi=kpi_name;result.stats=by_kpi[kpi_name.toLowerCase()];}
   else{result.by_kpi=by_kpi;}
   return result;
@@ -94,7 +94,7 @@ export const TOOL_DEFS = [
   { name:'get_patient_detail', description:'Returns the full clinical record for one patient.', input_schema:{type:'object',properties:{patient_id:{type:'string'}},required:['patient_id']}},
   { name:'get_patient_history', description:'Returns complete encounter timeline, diagnoses, medications, and C-SSRS breakdown. Use when asked about patient history, past visits, medications.', input_schema:{type:'object',properties:{patient_id:{type:'string'},lookback_days:{type:'integer',description:'Days to look back, default 365'}},required:['patient_id']}},
   { name:'get_high_risk_patients', description:'Returns high-risk patients — PHQ-9 ≥15 or SI, SSRS High, or unresolved crisis.', input_schema:{type:'object',properties:{risk_type:{type:'string',enum:['phq9','ssrs','crisis']}}}},
-  { name:'get_kpi_compliance', description:'Returns KPI completion rates vs 75% target.', input_schema:{type:'object',properties:{kpi_name:{type:'string',enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp']}}}},
+  { name:'get_kpi_compliance', description:'Returns KPI completion rates for each KPI.', input_schema:{type:'object',properties:{kpi_name:{type:'string',enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp']}}}},
   { name:'get_overdue_assessments', description:'Returns patients with overdue assessments.', input_schema:{type:'object',properties:{assessment_type:{type:'string',enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp']}}}},
   { name:'get_crisis_events', description:'Returns crisis episodes within a lookback window. Default: 28 days.', input_schema:{type:'object',properties:{window_days:{type:'integer'}}}},
   { name:'get_disengaged_patients', description:'Returns patients with no contact beyond threshold. Default: 30 days.', input_schema:{type:'object',properties:{threshold_days:{type:'integer'}}}},

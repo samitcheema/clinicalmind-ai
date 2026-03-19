@@ -13,7 +13,6 @@ When responding:
 - Use bullet points or short lists for multiple patients
 - Always cite specific scores, dates, and days
 - Flag urgent items clearly (unresolved crisis events, SSRS High, PHQ-9 ≥15)
-- Note whether KPI compliance meets the 75% target
 - When asked about patient history or past visits, use get_patient_history`;
 
 const TOOL_LABELS = {
