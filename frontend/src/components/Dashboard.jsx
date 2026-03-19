@@ -105,35 +105,21 @@ export default function Dashboard({ patients, loading }) {
           {/* KPI Panel */}
           <div className="panel">
             <div className="panel-title">KPI Compliance</div>
-            <div className="kpi-ring-grid">
-              {KPI_NAMES.map(k => {
-                const { pct, compliant, overdue } = s.kpiStats[k];
-                const r = 20;
-                const circ = 2 * Math.PI * r; // 125.66
-                const offset = circ - (pct / 100) * circ;
-                const ringColor = overdue === 0 ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--red)';
-                return (
-                  <div key={k} className="kpi-ring-item">
-                    <svg viewBox="0 0 52 52" className="kpi-ring-svg">
-                      <circle cx="26" cy="26" r={r} fill="none" stroke="var(--ring-track)" strokeWidth="4" />
-                      <circle
-                        cx="26" cy="26" r={r}
-                        fill="none"
-                        stroke={ringColor}
-                        strokeWidth="4"
-                        strokeLinecap="round"
-                        strokeDasharray={`${circ} ${circ}`}
-                        strokeDashoffset={offset}
-                        transform="rotate(-90 26 26)"
-                      />
-                      <text x="26" y="30" textAnchor="middle" fontSize="9" fontWeight="700" fill="var(--text)">{pct}%</text>
-                    </svg>
-                    <div className="kpi-ring-label">{KPI_DISPLAY[k]}</div>
-                    <div className="kpi-ring-sub">{compliant}/{compliant + overdue}</div>
+            {KPI_NAMES.map(k => {
+              const { pct, compliant, overdue } = s.kpiStats[k];
+              const barColor = overdue === 0 ? 'var(--green)' : pct >= 50 ? 'var(--amber)' : 'var(--red)';
+              return (
+                <div key={k} className="kpi-bar-item">
+                  <div className="kpi-bar-header">
+                    <span className="kpi-bar-label">{KPI_DISPLAY[k]}</span>
+                    <span className="kpi-bar-pct">{pct}% <small>({compliant}/{compliant + overdue})</small></span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="kpi-bar-track">
+                    <div className="kpi-bar-fill" style={{ width:`${pct}%`, background: barColor }} />
+                  </div>
+                </div>
+              );
+            })}
             <div className="panel-avg">
               Avg <strong>{s.overallPct}%</strong> across {KPI_NAMES.length} KPIs
             </div>
