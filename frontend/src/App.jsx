@@ -36,33 +36,35 @@ export default function App() {
       />
       <div className="main-area">
         <Topbar status={status} />
-        <div className="content-scroll">
-          {activeView === 'dashboard' && <Dashboard patients={patients} loading={status.state === 'loading'} />}
-          {activeView === 'patients'  && <PatientTable patients={patients} />}
-          {activeView === 'chat'      && (
-            <ChatPane
-              patients={patients}
-              apiKey={apiKey}
-              onNeedKey={() => setShowApiSetup(true)}
+        {showApiSetup && (
+          <div className="api-setup">
+            <label htmlFor="api-input">Anthropic API Key</label>
+            <input
+              id="api-input"
+              type="password"
+              className="api-input"
+              placeholder="sk-ant-..."
+              defaultValue={apiKey}
+              onKeyDown={e => e.key === 'Enter' && handleSaveKey(e.target.value.trim())}
             />
-          )}
-        </div>
-      </div>
-      {showApiSetup && (
-        <div className="api-setup">
-          <label htmlFor="api-input">Anthropic API Key</label>
-          <input
-            id="api-input"
-            type="password"
-            className="api-input"
-            placeholder="sk-ant-..."
-            defaultValue={apiKey}
-            onKeyDown={e => e.key === 'Enter' && handleSaveKey(e.target.value.trim())}
+            <button className="api-btn" onClick={e => handleSaveKey(e.target.previousElementSibling.value.trim())}>Connect</button>
+            <button className="api-btn" style={{background:'transparent',border:'1px solid var(--border)',color:'var(--text-3)'}} onClick={() => setShowApiSetup(false)}>✕</button>
+            <span className="api-note">Stored in your browser only</span>
+          </div>
+        )}
+        {activeView === 'chat' ? (
+          <ChatPane
+            patients={patients}
+            apiKey={apiKey}
+            onNeedKey={() => setShowApiSetup(true)}
           />
-          <button className="api-btn" onClick={e => handleSaveKey(e.target.previousElementSibling.value.trim())}>Connect</button>
-          <span className="api-note">Stored in your browser only</span>
-        </div>
-      )}
+        ) : (
+          <div className="content-scroll">
+            {activeView === 'dashboard' && <Dashboard patients={patients} loading={status.state === 'loading'} />}
+            {activeView === 'patients'  && <PatientTable patients={patients} />}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
