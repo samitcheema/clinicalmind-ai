@@ -9,11 +9,11 @@ The SPI has 6 standardized steps:
   Step 6 — Means restriction (MR): identifying and restricting access to lethal means
   Acknowledgment (AC): patient and clinician signatures confirming the plan
 */
-IF OBJECT_ID('src.grady_safety_plan_mapping') IS NOT NULL
-    DROP TABLE src.grady_safety_plan_mapping;
+IF OBJECT_ID('src.safety_plan_mapping') IS NOT NULL
+    DROP TABLE src.safety_plan_mapping;
 GO
 
-CREATE TABLE src.grady_safety_plan_mapping (
+CREATE TABLE src.safety_plan_mapping (
     field_id   NVARCHAR(50)  NOT NULL PRIMARY KEY   -- stable identifier for this form field
     , plan_name VARCHAR(300) NOT NULL                -- name of the safety plan this field belongs to
     , step_number TINYINT    NOT NULL                -- SPI step (1–6) or 0 for acknowledgment
@@ -23,10 +23,10 @@ CREATE TABLE src.grady_safety_plan_mapping (
     , is_repeatable BIT NOT NULL DEFAULT 0           -- 1 if multiple values are collected per step
     , display_order TINYINT NOT NULL                 -- order within the step
 );
-PRINT 'Table src.grady_safety_plan_mapping created.'
+PRINT 'Table src.safety_plan_mapping created.'
 GO
 
-INSERT INTO src.grady_safety_plan_mapping
+INSERT INTO src.safety_plan_mapping
     (field_id, plan_name, step_number, step_label, field_label, data_type, is_repeatable, display_order)
 VALUES
 -- Step 1: Warning Signs
@@ -83,11 +83,11 @@ This table captures crisis safety plan information by linking patient attribute 
 It tracks details about the input fields (name, abbreviation, data type), the plan name, and when the plan was completed.
 There is no attribution to encounters, so it does not require a join to the encounters table
 */
-IF OBJECT_ID('src.grady_crisis_safety_plan') IS NOT NULL
-    DROP TABLE src.grady_crisis_safety_plan;
+IF OBJECT_ID('src.crisis_safety_plan') IS NOT NULL
+    DROP TABLE src.crisis_safety_plan;
 GO
 
-CREATE TABLE src.grady_crisis_safety_plan (
+CREATE TABLE src.crisis_safety_plan (
     person_id BIGINT  -- Patient for whom the crisis safety plan record was created
     , attribute_id BIGINT -- Identifier for the attribute associated with the crisis safety plan
     , smart_data_element_epic_id NVARCHAR(50) -- EPIC identifier linking the attribute to the safety plan mapping
@@ -100,5 +100,5 @@ CREATE TABLE src.grady_crisis_safety_plan (
     , input_numeric_value NUMERIC(18, 2) -- Numeric input value captured for the attribute
     , input_date_value DATE -- Date input value captured for the attribute
 );
-PRINT 'Table src.grady_crisis_safety_plan created.';
+PRINT 'Table src.crisis_safety_plan created.';
 GO

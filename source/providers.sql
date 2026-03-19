@@ -1,8 +1,8 @@
-IF OBJECT_ID('src.grady_providers') IS NOT NULL
-    DROP TABLE src.grady_providers;
+IF OBJECT_ID('src.providers') IS NOT NULL
+    DROP TABLE src.providers;
 GO
 
-CREATE TABLE src.grady_providers (
+CREATE TABLE src.providers (
     provider_id BIGINT
     , provider_npi NVARCHAR(50)
     , provider_type NVARCHAR(100)

@@ -1,8 +1,8 @@
-IF OBJECT_ID('src.grady_diagnosis') IS NOT NULL
-    DROP TABLE src.grady_diagnosis;
+IF OBJECT_ID('src.diagnosis') IS NOT NULL
+    DROP TABLE src.diagnosis;
 GO
 
-CREATE TABLE src.grady_diagnosis (
+CREATE TABLE src.diagnosis (
     person_id BIGINT
     , diagnosis_key BIGINT
     , encounter_id BIGINT
@@ -13,9 +13,9 @@ CREATE TABLE src.grady_diagnosis (
     , diagnosis_desc NVARCHAR(850)
     , diagnosis_type NVARCHAR(350)
 )
-PRINT 'Table src.grady_diagnosis created.'
+PRINT 'Table src.diagnosis created.'
 GO
 
-ALTER TABLE src.grady_diagnosis
+ALTER TABLE src.diagnosis
 ADD Category VARCHAR(150)
 GO

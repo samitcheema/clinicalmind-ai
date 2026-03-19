@@ -5,11 +5,11 @@ Difference between Plan of Care and Treatment Plan(Will update once verifying ac
 - Plan of Care is the whole plan which includes treatments
 - Treatment Plan refers to a specific treatment within a Plan of Care
 */
-IF Object_Id('src.grady_treatment_plan') IS NOT NULL
-    DROP TABLE src.grady_treatment_plan
+IF Object_Id('src.treatment_plan') IS NOT NULL
+    DROP TABLE src.treatment_plan
 GO
 
-CREATE TABLE src.grady_treatment_plan (
+CREATE TABLE src.treatment_plan (
     bh_treatment_plan_id BIGINT -- Uniquely identify treatment plan record
     , plan_of_care_id BIGINT -- Plan of Care record ID
     , encounter_id BIGINT   -- Encounter in which treatment plan was completed
@@ -20,5 +20,5 @@ CREATE TABLE src.grady_treatment_plan (
     , next_treatment_plan_date DATE -- Date of the next treatment plan visit
     , plan_of_care_status NVARCHAR(255) -- Plan of Care status
 );
-PRINT 'Table src.grady_treatment_plan created.'
+PRINT 'Table src.treatment_plan created.'
 GO

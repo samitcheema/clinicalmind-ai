@@ -1,15 +1,15 @@
-IF Object_Id('src.grady_substanceuse') IS NOT NULL
-    DROP TABLE src.grady_substanceuse
+IF Object_Id('src.substance_use') IS NOT NULL
+    DROP TABLE src.substance_use
 GO
 
-CREATE TABLE src.grady_substanceuse (
+CREATE TABLE src.substance_use (
     icd_concept_name VARCHAR(255)
     , icd_code VARCHAR(20)
 );
-PRINT 'Table src.grady_substanceuse created.'
+PRINT 'Table src.substance_use created.'
 GO
 
-INSERT INTO src.grady_substanceuse
+INSERT INTO src.substance_use
 (
     icd_concept_name
     , icd_code

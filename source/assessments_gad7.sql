@@ -1,9 +1,9 @@
-IF OBJECT_ID('src.grady_gad7') IS NOT NULL
-    DROP TABLE src.grady_gad7;
+IF OBJECT_ID('src.gad7') IS NOT NULL
+    DROP TABLE src.gad7;
 GO
 
 -- factors scored between 1.00 and 3.00
-CREATE TABLE src.grady_gad7 (
+CREATE TABLE src.gad7 (
     person_id BIGINT
     , encounter_id BIGINT
     , employee_id BIGINT
@@ -17,5 +17,5 @@ CREATE TABLE src.grady_gad7 (
     , constant_worry NUMERIC(3, 2)
     , total_score NUMERIC(4, 2)
 )
-PRINT 'Table src.grady_gad7 created.'
+PRINT 'Table src.gad7 created.'
 GO

@@ -1,8 +1,8 @@
-IF OBJECT_ID('src.grady_assessment') IS NOT NULL
-    DROP TABLE src.grady_assessment;
+IF OBJECT_ID('src.assessment') IS NOT NULL
+    DROP TABLE src.assessment;
 GO
 
-CREATE TABLE src.grady_assessment (
+CREATE TABLE src.assessment (
     EncounterKey BIGINT
     , PatientDurableKey BIGINT
     , DurableKey BIGINT
@@ -11,5 +11,5 @@ CREATE TABLE src.grady_assessment (
     , FRDName NVARCHAR(300)
     , Value NVARCHAR(2500)
 )
-PRINT 'Table src.grady_assessment created.'
+PRINT 'Table src.assessment created.'
 GO

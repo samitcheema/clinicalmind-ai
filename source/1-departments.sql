@@ -38,11 +38,11 @@ VALUES
 , (N'Behavioral Health Primary Care Integration', 0, 1, 0)
 GO
 
-IF OBJECT_ID('src.grady_departments') IS NOT NULL
-    DROP TABLE src.grady_departments;
+IF OBJECT_ID('src.departments') IS NOT NULL
+    DROP TABLE src.departments;
 GO
 
-CREATE TABLE src.grady_departments (
+CREATE TABLE src.departments (
     department_key BIGINT
     , department_name NVARCHAR(255)
     , location_name NVARCHAR(255)

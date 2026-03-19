@@ -3,11 +3,11 @@
 * 22 assessment columns (total_score, difference_from_last, + 20 domain scores)
 * Scoring: 1-7 scale for individual domains, composite score for total
 */
-IF OBJECT_ID('src.grady_dla20') IS NOT NULL
-    DROP TABLE src.grady_dla20;
+IF OBJECT_ID('src.dla20') IS NOT NULL
+    DROP TABLE src.dla20;
 GO
 
-CREATE TABLE src.grady_dla20 (
+CREATE TABLE src.dla20 (
     person_id BIGINT
     , encounter_id BIGINT
     , employee_id BIGINT
@@ -37,5 +37,5 @@ CREATE TABLE src.grady_dla20 (
     , alcohol_drug_use NUMERIC(3, 2)
     , health_practices NUMERIC(3, 2)
 )
-PRINT 'Table src.grady_dla20 created.'
+PRINT 'Table src.dla20 created.'
 GO

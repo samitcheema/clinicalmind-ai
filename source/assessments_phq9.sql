@@ -1,9 +1,9 @@
-IF OBJECT_ID('src.grady_phq9') IS NOT NULL
-    DROP TABLE src.grady_phq9;
+IF OBJECT_ID('src.phq9') IS NOT NULL
+    DROP TABLE src.phq9;
 GO
 
 -- factors scored between 1.00 and 3.00
-CREATE TABLE src.grady_phq9 (
+CREATE TABLE src.phq9 (
     person_id BIGINT
     , encounter_id BIGINT
     , employee_id BIGINT
@@ -21,5 +21,5 @@ CREATE TABLE src.grady_phq9 (
     , how_difficult NUMERIC(3, 2) -- NOTE: We are not utilizing this question in our assessment. Once we assess numeric mapping, it will be implemented.
     , total_score NUMERIC(4, 2)
 )
-PRINT 'Table src.grady_phq9 created.'
+PRINT 'Table src.phq9 created.'
 GO

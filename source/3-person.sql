@@ -1,8 +1,8 @@
-IF Object_Id('src.grady_person') IS NOT NULL
-    DROP TABLE src.grady_person
+IF Object_Id('src.person') IS NOT NULL
+    DROP TABLE src.person
 GO
 
-CREATE TABLE src.grady_person (
+CREATE TABLE src.person (
     DurableKey BIGINT
     , StartDate DATE
     , DeathDate DATE
@@ -19,9 +19,9 @@ CREATE TABLE src.grady_person (
     , FirstRace NVARCHAR(255)
     , MaritalStatus NVARCHAR(300)
 );
-PRINT 'Table src.grady_person created.'
+PRINT 'Table src.person created.'
 GO
 
-CREATE INDEX IX_grady_person_durablekey
-    ON src.grady_person (DurableKey);
+CREATE INDEX IX_person_durablekey
+    ON src.person (DurableKey);
 GO

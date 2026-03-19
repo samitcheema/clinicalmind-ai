@@ -1,8 +1,8 @@
-IF Object_Id('src.grady_encounter') IS NOT NULL
-    DROP TABLE src.grady_encounter
+IF Object_Id('src.encounter') IS NOT NULL
+    DROP TABLE src.encounter
 GO
 
-CREATE TABLE src.grady_encounter (
+CREATE TABLE src.encounter (
     person_id BIGINT
     , provider_id BIGINT
     , encounter_id BIGINT
@@ -46,11 +46,11 @@ CREATE TABLE src.grady_encounter (
 );
 GO
 
-PRINT 'Table src.grady_encounter created.'
+PRINT 'Table src.encounter created.'
 GO
 
-CREATE NONCLUSTERED INDEX IX_grady_encounter_person
-    ON src.grady_encounter (person_id)
+CREATE NONCLUSTERED INDEX IX_encounter_person
+    ON src.encounter (person_id)
     INCLUDE (
         encounter_id
         , encounter_date
@@ -59,8 +59,8 @@ CREATE NONCLUSTERED INDEX IX_grady_encounter_person
     )
 GO
 
-CREATE NONCLUSTERED INDEX IX_grady_encounter_encounter
-    ON src.grady_encounter (encounter_id)
+CREATE NONCLUSTERED INDEX IX_encounter_encounter
+    ON src.encounter (encounter_id)
     INCLUDE (
         person_id
         , encounter_date

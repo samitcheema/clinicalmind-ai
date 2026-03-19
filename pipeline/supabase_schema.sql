@@ -259,8 +259,8 @@ INSERT INTO src.departments_of_interest (department_name, is_inpatient, is_outpa
 ON CONFLICT DO NOTHING;
 
 
--- ── src.grady_departments ─────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_departments (
+-- ── src.departments ───────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.departments (
     department_key       BIGINT,
     department_name      VARCHAR(255),
     location_name        VARCHAR(255),
@@ -273,8 +273,8 @@ CREATE TABLE IF NOT EXISTS src.grady_departments (
 );
 
 
--- ── src.grady_encounter ───────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_encounter (
+-- ── src.encounter ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.encounter (
     person_id                 BIGINT,
     provider_id               BIGINT,
     encounter_id              BIGINT,
@@ -316,12 +316,12 @@ CREATE TABLE IF NOT EXISTS src.grady_encounter (
     is_psychiatric_emergency  BOOLEAN,
     is_crisis_intervention    BOOLEAN
 );
-CREATE INDEX IF NOT EXISTS IX_grady_encounter_person    ON src.grady_encounter (person_id);
-CREATE INDEX IF NOT EXISTS IX_grady_encounter_encounter ON src.grady_encounter (encounter_id);
+CREATE INDEX IF NOT EXISTS IX_encounter_person    ON src.encounter (person_id);
+CREATE INDEX IF NOT EXISTS IX_encounter_encounter ON src.encounter (encounter_id);
 
 
--- ── src.grady_person ──────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_person (
+-- ── src.person ────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.person (
     DurableKey                    BIGINT,
     StartDate                     DATE,
     DeathDate                     DATE,
@@ -338,7 +338,7 @@ CREATE TABLE IF NOT EXISTS src.grady_person (
     FirstRace                     VARCHAR(255),
     MaritalStatus                 VARCHAR(300)
 );
-CREATE INDEX IF NOT EXISTS IX_grady_person_durablekey ON src.grady_person ("DurableKey");
+CREATE INDEX IF NOT EXISTS IX_person_durablekey ON src.person ("DurableKey");
 
 
 -- ── src.allergies ─────────────────────────────────────────────
@@ -358,8 +358,8 @@ CREATE TABLE IF NOT EXISTS src.allergies (
 CREATE INDEX IF NOT EXISTS IX_allergies_su_id_allergy_id ON src.allergies (su_id, allergy_id);
 
 
--- ── src.grady_assessment ──────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_assessment (
+-- ── src.assessment ────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.assessment (
     "EncounterKey"      BIGINT,
     "PatientDurableKey" BIGINT,
     "DurableKey"        BIGINT,
@@ -370,8 +370,8 @@ CREATE TABLE IF NOT EXISTS src.grady_assessment (
 );
 
 
--- ── src.grady_dla20 ───────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_dla20 (
+-- ── src.dla20 ─────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.dla20 (
     person_id            BIGINT,
     encounter_id         BIGINT,
     employee_id          BIGINT,
@@ -402,8 +402,8 @@ CREATE TABLE IF NOT EXISTS src.grady_dla20 (
 );
 
 
--- ── src.grady_cssrs ───────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_cssrs (
+-- ── src.cssrs ─────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.cssrs (
     person_id               BIGINT,
     encounter_id            BIGINT,
     employee_id             BIGINT,
@@ -418,8 +418,8 @@ CREATE TABLE IF NOT EXISTS src.grady_cssrs (
 );
 
 
--- ── src.grady_gad7 ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_gad7 (
+-- ── src.gad7 ──────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.gad7 (
     person_id                    BIGINT,
     encounter_id                 BIGINT,
     employee_id                  BIGINT,
@@ -435,8 +435,8 @@ CREATE TABLE IF NOT EXISTS src.grady_gad7 (
 );
 
 
--- ── src.grady_pain_assessment ─────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_pain_assessment (
+-- ── src.pain_assessment ───────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.pain_assessment (
     su_id             BIGINT,
     encounter_id      BIGINT,
     staff_id          BIGINT,
@@ -447,8 +447,8 @@ CREATE TABLE IF NOT EXISTS src.grady_pain_assessment (
 );
 
 
--- ── src.grady_phq9 ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_phq9 (
+-- ── src.phq9 ──────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.phq9 (
     person_id             BIGINT,
     encounter_id          BIGINT,
     employee_id           BIGINT,
@@ -468,8 +468,8 @@ CREATE TABLE IF NOT EXISTS src.grady_phq9 (
 );
 
 
--- ── src.grady_safety_plan_mapping ────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_safety_plan_mapping (
+-- ── src.safety_plan_mapping ───────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.safety_plan_mapping (
     field_id      VARCHAR(50)  NOT NULL PRIMARY KEY,
     plan_name     VARCHAR(300) NOT NULL,
     step_number   SMALLINT     NOT NULL,
@@ -480,7 +480,7 @@ CREATE TABLE IF NOT EXISTS src.grady_safety_plan_mapping (
     display_order SMALLINT     NOT NULL
 );
 
-INSERT INTO src.grady_safety_plan_mapping
+INSERT INTO src.safety_plan_mapping
     (field_id, plan_name, step_number, step_label, field_label, data_type, is_repeatable, display_order)
 VALUES
 ('SPI-WS-01','Stanley-Brown Safety Planning Intervention',1,'Warning Signs','Warning sign 1 (thoughts/feelings)','text',true,1),
@@ -518,8 +518,8 @@ VALUES
 ON CONFLICT DO NOTHING;
 
 
--- ── src.grady_crisis_safety_plan ─────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_crisis_safety_plan (
+-- ── src.crisis_safety_plan ────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.crisis_safety_plan (
     person_id                  BIGINT,
     attribute_id               BIGINT,
     smart_data_element_epic_id VARCHAR(50),
@@ -534,8 +534,8 @@ CREATE TABLE IF NOT EXISTS src.grady_crisis_safety_plan (
 );
 
 
--- ── src.grady_diagnosis ───────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_diagnosis (
+-- ── src.diagnosis ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.diagnosis (
     person_id           BIGINT,
     diagnosis_key       BIGINT,
     encounter_id        BIGINT,
@@ -549,8 +549,8 @@ CREATE TABLE IF NOT EXISTS src.grady_diagnosis (
 );
 
 
--- ── src.grady_drug ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_drug (
+-- ── src.drug ──────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.drug (
     su_id      BIGINT,
     drug_id    BIGINT,
     name       VARCHAR(255),
@@ -596,8 +596,8 @@ CREATE TABLE IF NOT EXISTS src.prescriptions (
 );
 
 
--- ── src.grady_procedures ──────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_procedures (
+-- ── src.procedures ────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.procedures (
     person_id                  BIGINT,
     encounter_id               BIGINT,
     procedure_durable_key      BIGINT,
@@ -609,11 +609,11 @@ CREATE TABLE IF NOT EXISTS src.grady_procedures (
     event_start_date           DATE,
     event_end_date             DATE
 );
-CREATE INDEX IF NOT EXISTS IX_grady_procedures ON src.grady_procedures (procedure_durable_key);
+CREATE INDEX IF NOT EXISTS IX_procedures ON src.procedures (procedure_durable_key);
 
 
--- ── src.grady_providers ───────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_providers (
+-- ── src.providers ─────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.providers (
     provider_id              BIGINT,
     provider_npi             VARCHAR(50),
     provider_type            VARCHAR(100),
@@ -625,9 +625,9 @@ CREATE TABLE IF NOT EXISTS src.grady_providers (
 );
 
 
--- ── src.grady_substanceuse ────────────────────────────────────
+-- ── src.substance_use ─────────────────────────────────────────
 -- ICD-10 substance use disorder codes (reference data, no PK — dupes in source)
-CREATE TABLE IF NOT EXISTS src.grady_substanceuse (
+CREATE TABLE IF NOT EXISTS src.substance_use (
     icd_concept_name VARCHAR(255),
     icd_code         VARCHAR(20)
 );
@@ -644,8 +644,8 @@ CREATE TABLE IF NOT EXISTS src."ZipCodeList" (
 -- (Populated via ensure_schema.py insert-if-empty guard)
 
 
--- ── src.grady_treatment_plan ──────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.grady_treatment_plan (
+-- ── src.treatment_plan ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS src.treatment_plan (
     bh_treatment_plan_id     BIGINT,
     plan_of_care_id          BIGINT,
     encounter_id             BIGINT,
@@ -663,13 +663,13 @@ DO $$
 DECLARE t TEXT;
 BEGIN
     FOREACH t IN ARRAY ARRAY[
-        'src.departments_of_interest','src.grady_departments','src.grady_encounter',
-        'src.grady_person','src.allergies','src.grady_assessment','src.grady_dla20',
-        'src.grady_cssrs','src.grady_gad7','src.grady_pain_assessment','src.grady_phq9',
-        'src.grady_safety_plan_mapping','src.grady_crisis_safety_plan','src.grady_diagnosis',
-        'src.grady_drug','src.drug_procedure_mapping','src.inpatient','src.prescriptions',
-        'src.grady_procedures','src.grady_providers','src.grady_substanceuse',
-        'src.grady_treatment_plan'
+        'src.departments_of_interest','src.departments','src.encounter',
+        'src.person','src.allergies','src.assessment','src.dla20',
+        'src.cssrs','src.gad7','src.pain_assessment','src.phq9',
+        'src.safety_plan_mapping','src.crisis_safety_plan','src.diagnosis',
+        'src.drug','src.drug_procedure_mapping','src.inpatient','src.prescriptions',
+        'src.procedures','src.providers','src.substance_use',
+        'src.treatment_plan'
     ] LOOP
         EXECUTE format('ALTER TABLE %s ENABLE ROW LEVEL SECURITY', t);
         BEGIN

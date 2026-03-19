@@ -1,8 +1,8 @@
-IF OBJECT_ID('src.grady_procedures') IS NOT NULL
-    DROP TABLE src.grady_procedures
+IF OBJECT_ID('src.procedures') IS NOT NULL
+    DROP TABLE src.procedures
 GO
 
-CREATE TABLE src.grady_procedures (
+CREATE TABLE src.procedures (
     person_id BIGINT                        -- Person identifier
     , encounter_id BIGINT                   -- Encounter identifier associated with procedure
     , procedure_durable_key BIGINT          -- Procedure key identifier
@@ -16,7 +16,7 @@ CREATE TABLE src.grady_procedures (
 )
 GO
 
-CREATE NONCLUSTERED INDEX IX_grady_procedures
-    ON src.grady_procedures (procedure_durable_key)
+CREATE NONCLUSTERED INDEX IX_procedures
+    ON src.procedures (procedure_durable_key)
     INCLUDE (ordered_date, event_start_date, event_end_date, procedure_code, procedure_status)
 GO

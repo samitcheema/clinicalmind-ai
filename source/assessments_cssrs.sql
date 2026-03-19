@@ -1,8 +1,8 @@
-IF OBJECT_ID('src.grady_cssrs') IS NOT NULL
-    DROP TABLE src.grady_cssrs;
+IF OBJECT_ID('src.cssrs') IS NOT NULL
+    DROP TABLE src.cssrs;
 GO
 
-CREATE TABLE src.grady_cssrs (
+CREATE TABLE src.cssrs (
     person_id BIGINT
     , encounter_id BIGINT
     , employee_id BIGINT
@@ -15,5 +15,5 @@ CREATE TABLE src.grady_cssrs (
     , ideation_with_method NVARCHAR(4)
     , prior_suicidal_behavior NVARCHAR(4)
 )
-PRINT 'Table src.grady_cssrs created.'
+PRINT 'Table src.cssrs created.'
 GO
