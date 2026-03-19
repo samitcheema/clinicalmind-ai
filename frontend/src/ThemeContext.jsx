@@ -10,8 +10,9 @@ export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(
     () => localStorage.getItem('cm-theme') || 'system'
   );
+  const [systemTheme, setSystemTheme] = useState(getSystemTheme);
 
-  const effectiveTheme = theme === 'system' ? getSystemTheme() : theme;
+  const effectiveTheme = theme === 'system' ? systemTheme : theme;
 
   useEffect(() => {
     if (effectiveTheme === 'light') {
@@ -24,10 +25,7 @@ export function ThemeProvider({ children }) {
   useEffect(() => {
     if (theme !== 'system') return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const handler = () => {
-      // Re-render to pick up new system preference
-      setThemeState('system');
-    };
+    const handler = (e) => setSystemTheme(e.matches ? 'dark' : 'light');
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);
   }, [theme]);
