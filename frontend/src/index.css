@@ -2,8 +2,8 @@
 html, body, #root { height: 100%; overflow: hidden; }
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #f0f4f8;
-  color: #0f172a;
+  background: var(--bg);
+  color: var(--text);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -35,6 +35,21 @@ body {
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.3);
   --shadow:       0 4px 6px rgba(0,0,0,0.4);
   --radius:       12px;
+}
+
+[data-theme="light"] {
+  --bg:           #f5f4f2;
+  --surface:      #fdfcfb;
+  --surface-2:    #ece9e4;
+  --border:       #d6d0c8;
+  --border-light: #ece9e4;
+  --text:         #1e1a16;
+  --text-2:       #3d3530;
+  --text-3:       #7a6f66;
+  --text-4:       #a8a097;
+  --ring-track:   #e8e2da;
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.08);
+  --shadow:       0 4px 6px rgba(0,0,0,0.10);
 }
 
 /* ── Scrollbars ── */
@@ -298,7 +313,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
   top: 3px;
   width: 10px; height: 10px;
   border-radius: 50%;
-  border: 2px solid white;
+  border: 2px solid var(--surface);
   box-shadow: 0 0 0 1.5px currentColor;
 }
 .tl-dot.blue   { background: #3b82f6; color: #3b82f6; }
