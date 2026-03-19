@@ -1,56 +1,79 @@
--- This table contains a mapping for form elements and to the safety plan they link to
--- Each element is linked to a field on the specified safety plan form
+/*
+Maps each form field to its section in the Stanley-Brown Safety Planning Intervention (SPI).
+The SPI has 6 standardized steps:
+  Step 1 — Warning signs (WS): personal indicators that a crisis may be developing
+  Step 2 — Internal coping strategies (IC): things the patient can do alone to distract
+  Step 3 — Social distractions (SD): people/places that provide distraction without disclosure
+  Step 4 — Social support contacts (SH): people the patient can ask for help
+  Step 5 — Professional/agency contacts (PR): clinicians, crisis lines, emergency services
+  Step 6 — Means restriction (MR): identifying and restricting access to lethal means
+  Acknowledgment (AC): patient and clinician signatures confirming the plan
+*/
 IF OBJECT_ID('src.grady_safety_plan_mapping') IS NOT NULL
     DROP TABLE src.grady_safety_plan_mapping;
 GO
 
 CREATE TABLE src.grady_safety_plan_mapping (
-    smart_data_element_epic_id NVARCHAR(50) NOT NULL PRIMARY KEY
-    , plan_name VARCHAR(300) NOT NULL
+    field_id   NVARCHAR(50)  NOT NULL PRIMARY KEY   -- stable identifier for this form field
+    , plan_name VARCHAR(300) NOT NULL                -- name of the safety plan this field belongs to
+    , step_number TINYINT    NOT NULL                -- SPI step (1–6) or 0 for acknowledgment
+    , step_label  NVARCHAR(100) NOT NULL             -- human-readable step name
+    , field_label NVARCHAR(255) NOT NULL             -- label shown on the form
+    , data_type   NVARCHAR(50)  NOT NULL             -- 'text', 'phone', 'date', 'boolean'
+    , is_repeatable BIT NOT NULL DEFAULT 0           -- 1 if multiple values are collected per step
+    , display_order TINYINT NOT NULL                 -- order within the step
 );
 PRINT 'Table src.grady_safety_plan_mapping created.'
 GO
 
-INSERT INTO src.grady_safety_plan_mapping (smart_data_element_epic_id, plan_name)
+INSERT INTO src.grady_safety_plan_mapping
+    (field_id, plan_name, step_number, step_label, field_label, data_type, is_repeatable, display_order)
 VALUES
-('GHS#4874', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4875', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4763', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4764', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169338', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169339', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169363', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169364', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169343', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169344', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000204859', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000188307', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000188308', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000188309', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000204860', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000188310', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4684', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4685', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4686', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4682', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4687', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4688', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4689', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000204861', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000188315', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000237024', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000237021', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000237022', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000237023', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4690', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4691', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4692', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4693', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000211455', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169361', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('EPIC#31000169362', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4683', 'BH AMB STANELY BROWN SAFETY PLAN')
-, ('GHS#4694', 'BH AMB STANELY BROWN SAFETY PLAN')
+-- Step 1: Warning Signs
+('SPI-WS-01', 'Stanley-Brown Safety Planning Intervention', 1, 'Warning Signs', 'Warning sign 1 (thoughts/feelings)',    'text', 1, 1)
+, ('SPI-WS-02', 'Stanley-Brown Safety Planning Intervention', 1, 'Warning Signs', 'Warning sign 2 (behaviors)',             'text', 1, 2)
+, ('SPI-WS-03', 'Stanley-Brown Safety Planning Intervention', 1, 'Warning Signs', 'Warning sign 3 (situations/triggers)',   'text', 1, 3)
+
+-- Step 2: Internal Coping Strategies
+, ('SPI-IC-01', 'Stanley-Brown Safety Planning Intervention', 2, 'Internal Coping Strategies', 'Internal coping strategy 1', 'text', 1, 1)
+, ('SPI-IC-02', 'Stanley-Brown Safety Planning Intervention', 2, 'Internal Coping Strategies', 'Internal coping strategy 2', 'text', 1, 2)
+, ('SPI-IC-03', 'Stanley-Brown Safety Planning Intervention', 2, 'Internal Coping Strategies', 'Internal coping strategy 3', 'text', 1, 3)
+
+-- Step 3: Social Distractions (people/settings that provide distraction without disclosing suicidal ideation)
+, ('SPI-SD-01', 'Stanley-Brown Safety Planning Intervention', 3, 'Social Distractions', 'Social distraction contact/place 1', 'text', 1, 1)
+, ('SPI-SD-02', 'Stanley-Brown Safety Planning Intervention', 3, 'Social Distractions', 'Social distraction contact/place 2', 'text', 1, 2)
+, ('SPI-SD-03', 'Stanley-Brown Safety Planning Intervention', 3, 'Social Distractions', 'Social distraction contact/place 3', 'text', 1, 3)
+
+-- Step 4: Social Support Contacts (people to ask for help)
+, ('SPI-SH-01', 'Stanley-Brown Safety Planning Intervention', 4, 'Social Support Contacts', 'Support contact 1 – name',  'text',  1, 1)
+, ('SPI-SH-02', 'Stanley-Brown Safety Planning Intervention', 4, 'Social Support Contacts', 'Support contact 1 – phone', 'phone', 1, 2)
+, ('SPI-SH-03', 'Stanley-Brown Safety Planning Intervention', 4, 'Social Support Contacts', 'Support contact 2 – name',  'text',  1, 3)
+, ('SPI-SH-04', 'Stanley-Brown Safety Planning Intervention', 4, 'Social Support Contacts', 'Support contact 2 – phone', 'phone', 1, 4)
+, ('SPI-SH-05', 'Stanley-Brown Safety Planning Intervention', 4, 'Social Support Contacts', 'Support contact 3 – name',  'text',  1, 5)
+, ('SPI-SH-06', 'Stanley-Brown Safety Planning Intervention', 4, 'Social Support Contacts', 'Support contact 3 – phone', 'phone', 1, 6)
+
+-- Step 5: Professional and Agency Contacts
+, ('SPI-PR-01', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Treating clinician – name',           'text',  0, 1)
+, ('SPI-PR-02', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Treating clinician – phone',          'phone', 0, 2)
+, ('SPI-PR-03', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Crisis line – name',                  'text',  0, 3)
+, ('SPI-PR-04', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Crisis line – phone',                 'phone', 0, 4)
+, ('SPI-PR-05', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Additional professional – name',      'text',  1, 5)
+, ('SPI-PR-06', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Additional professional – phone',     'phone', 1, 6)
+, ('SPI-PR-07', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Nearest emergency department – name', 'text',  0, 7)
+, ('SPI-PR-08', 'Stanley-Brown Safety Planning Intervention', 5, 'Professional Contacts', 'Nearest emergency department – address', 'text', 0, 8)
+
+-- Step 6: Means Restriction
+, ('SPI-MR-01', 'Stanley-Brown Safety Planning Intervention', 6, 'Means Restriction', 'Lethal means identified',              'text',    1, 1)
+, ('SPI-MR-02', 'Stanley-Brown Safety Planning Intervention', 6, 'Means Restriction', 'Means restriction plan',               'text',    1, 2)
+, ('SPI-MR-03', 'Stanley-Brown Safety Planning Intervention', 6, 'Means Restriction', 'Responsible party for safekeeping',    'text',    1, 3)
+, ('SPI-MR-04', 'Stanley-Brown Safety Planning Intervention', 6, 'Means Restriction', 'Firearms removed or secured',          'boolean', 0, 4)
+, ('SPI-MR-05', 'Stanley-Brown Safety Planning Intervention', 6, 'Means Restriction', 'Medications secured or limited supply', 'boolean', 0, 5)
+
+-- Acknowledgment
+, ('SPI-AC-01', 'Stanley-Brown Safety Planning Intervention', 0, 'Acknowledgment', 'Patient acknowledged plan',     'boolean', 0, 1)
+, ('SPI-AC-02', 'Stanley-Brown Safety Planning Intervention', 0, 'Acknowledgment', 'Clinician signature',          'text',    0, 2)
+, ('SPI-AC-03', 'Stanley-Brown Safety Planning Intervention', 0, 'Acknowledgment', 'Plan completion date',         'date',    0, 3)
+, ('SPI-AC-04', 'Stanley-Brown Safety Planning Intervention', 0, 'Acknowledgment', 'Next review date',             'date',    0, 4)
 GO
 
 /*
@@ -78,36 +101,4 @@ CREATE TABLE src.grady_crisis_safety_plan (
     , input_date_value DATE -- Date input value captured for the attribute
 );
 PRINT 'Table src.grady_crisis_safety_plan created.';
-GO
-
-INSERT INTO src.grady_crisis_safety_plan (
-    person_id
-    , attribute_id
-    , smart_data_element_epic_id
-    , plan_name
-    , input_name
-    , input_abbreviation
-    , data_type
-    , completion_date
-    , input_value
-    , input_numeric_value
-    , input_date_value
-)
-SELECT
-    PPAV.PatientDurableKey AS person_id
-    , PPAV.AttributeKey AS attribute_id
-    , AD.SmartDataElementEpicId AS smart_data_element_epic_id
-    , SPM.plan_name
-    , AD.Name AS input_name
-    , AD.Abbreviation AS input_abbreviation
-    , AD.DataType AS data_type
-    , COMPLETIONDT.DateValue AS completion_date
-    , PPAV.Value AS input_value
-    , PPAV.NumericValue AS input_numeric_value
-    , PPAV.DateValue AS input_date_value
-FROM src.grady_person P
-INNER JOIN [CDW].[dbo].PatientAttributeValueDim PPAV ON P.DurableKey = PPAV.PatientDurableKey
-INNER JOIN [CDW].[dbo].AttributeDim AD ON PPAV.AttributeKey = AD.AttributeKey
-INNER JOIN [CDW].[dbo].DateDim COMPLETIONDT ON PPAV.DateKey = COMPLETIONDT.DateKey
-INNER JOIN src.grady_safety_plan_mapping SPM ON AD.SmartDataElementEpicId = SPM.smart_data_element_epic_id;
 GO

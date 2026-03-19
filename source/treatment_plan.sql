@@ -22,27 +22,3 @@ CREATE TABLE src.grady_treatment_plan (
 );
 PRINT 'Table src.grady_treatment_plan created.'
 GO
-
-INSERT INTO src.grady_treatment_plan (
-    bh_treatment_plan_id
-    , plan_of_care_id
-    , encounter_id
-    , person_id
-    , provider_id
-    , plan_of_care_name
-    , treatment_plan_date
-    , next_treatment_plan_date
-    , plan_of_care_status
-)
-SELECT
-    BehavioralHealthTreatmentPlanKey AS bh_treatment_plan_id
-    , RecordID AS plan_of_care_id
-    , EncounterKey AS encounter_id
-    , PatientDurableKey AS person_id
-    , ProviderDurableKey AS provider_id
-    , RecordName AS plan_of_care_name
-    , TreatmentPlanDate AS treatment_plan_date
-    , NextTreatmentPlanDate AS next_treatment_plan_date
-    , POCStatus AS plan_of_care_status
-FROM src.grady_person P
-INNER JOIN [CDW].[dbo].[BehavioralHealthTreatmentPlanFactX] BHTPX ON P.DurableKey = BHTPX.PatientDurableKey
