@@ -41,7 +41,7 @@ export function generateEncounters(p, rand) {
   const list = [];
 
   for (const ce of (p.crisis_events || [])) {
-    list.push({ date:ce.date, type:'PES Visit', dept:'GHS Emergency', isPES:true, isCIS:false, color:'red', status:'Completed', provider:p.provider });
+    list.push({ date:ce.date, type:'PES Visit', dept:'Psychiatric Emergency Unit', isPES:true, isCIS:false, color:'red', status:'Completed', provider:p.provider });
   }
   if (p.last_contact_date) {
     list.push({ date:p.last_contact_date, type:'Outpatient', dept:'BH Ambulatory Clinic', isPES:false, isCIS:false, color:'blue', status:'Completed', provider:p.provider });
