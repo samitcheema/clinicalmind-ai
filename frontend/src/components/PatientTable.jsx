@@ -33,12 +33,6 @@ export default function PatientTable({ patients }) {
       let va, vb;
       switch(sort.col) {
         case 'name':    va=a.name;          vb=b.name;          break;
-        case 'risk': {
-          const order = { High:2, Moderate:1, Low:0 };
-          va = order[a.risk_level] ?? 3;
-          vb = order[b.risk_level] ?? 3;
-          break;
-        }
         case 'contact': va=a.last_contact_date||'';      vb=b.last_contact_date||'';     break;
         case 'overdue': va=KPI_NAMES.filter(k=>a.kpis[k]?.overdue).length;
                         vb=KPI_NAMES.filter(k=>b.kpis[k]?.overdue).length; break;
@@ -76,7 +70,6 @@ export default function PatientTable({ patients }) {
             <tr>
               <th style={{width:32}} className="no-sort"></th>
               <SortTh col="name">Patient</SortTh>
-              <SortTh col="risk">Risk</SortTh>
               <th>Diagnosis</th>
               <SortTh col="overdue">KPI Status</SortTh>
               <SortTh col="contact">Last Contact</SortTh>
@@ -85,7 +78,7 @@ export default function PatientTable({ patients }) {
           </thead>
           <tbody>
             {filtered.length === 0 ? (
-              <tr className="no-data"><td colSpan={7}>No patients match the current filter.</td></tr>
+              <tr className="no-data"><td colSpan={6}>No patients match the current filter.</td></tr>
             ) : filtered.map(p => {
               const isExp = expanded.has(p.id);
               const days = daysBetween(p.last_contact_date);
@@ -109,14 +102,9 @@ export default function PatientTable({ patients }) {
                     <span className="pt-name">{p.name}</span>
                     <span className="pt-id">{p.id}</span>
                   </td>
-                  <td>
-                    <span className={`risk-pill risk-pill-${p.risk_level.toLowerCase()}`}>
-                      {p.risk_level}
-                    </span>
-                  </td>
                   <td className="diag-cell">
                     {p.diagnoses && p.diagnoses.length > 0
-                      ? p.diagnoses[0].description
+                      ? p.diagnoses.map(d => d.code).join(', ')
                       : '—'}
                   </td>
                   <td>
@@ -135,7 +123,7 @@ export default function PatientTable({ patients }) {
                 </tr>,
                 isExp && (
                   <tr key={`detail-${p.id}`} className="detail-row">
-                    <td colSpan={7}>
+                    <td colSpan={6}>
                       <PatientDetail patient={p} />
                     </td>
                   </tr>
