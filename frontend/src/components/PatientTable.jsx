@@ -1,11 +1,11 @@
 import { useState, useMemo } from 'react';
-import { KPI_NAMES } from '../utils/dataTransform.js';
+import { KPI_NAMES, KPI_DISPLAY } from '../utils/dataTransform.js';
 import { daysBetween } from '../utils/tools.js';
 import PatientDetail from './PatientDetail.jsx';
 
 export default function PatientTable({ patients }) {
   const [search, setSearch] = useState('');
-  const [sort, setSort] = useState({ col:'phq9', dir:'desc' });
+  const [sort, setSort] = useState({ col:'name', dir:'asc' });
   const [expanded, setExpanded] = useState(new Set());
 
   function toggleExpand(id) {
@@ -33,7 +33,12 @@ export default function PatientTable({ patients }) {
       let va, vb;
       switch(sort.col) {
         case 'name':    va=a.name;          vb=b.name;          break;
-        case 'phq9':    va=a.phq9.score;    vb=b.phq9.score;    break;
+        case 'risk': {
+          const order = { High:0, Moderate:1, Low:2 };
+          va = order[a.risk_level] ?? 3;
+          vb = order[b.risk_level] ?? 3;
+          break;
+        }
         case 'contact': va=a.last_contact_date||'';      vb=b.last_contact_date||'';     break;
         case 'overdue': va=KPI_NAMES.filter(k=>a.kpis[k].overdue).length;
                         vb=KPI_NAMES.filter(k=>b.kpis[k].overdue).length; break;
@@ -71,11 +76,11 @@ export default function PatientTable({ patients }) {
             <tr>
               <th style={{width:32}} className="no-sort"></th>
               <SortTh col="name">Patient</SortTh>
-              <th>Provider</th>
-              <SortTh col="phq9">PHQ-9</SortTh>
-              <th>SSRS</th>
+              <SortTh col="risk">Risk</SortTh>
+              <th>Diagnosis</th>
+              <SortTh col="overdue">KPI Status</SortTh>
               <SortTh col="contact">Last Contact</SortTh>
-              <SortTh col="overdue">Overdue KPIs</SortTh>
+              <th>Provider</th>
             </tr>
           </thead>
           <tbody>
@@ -86,9 +91,6 @@ export default function PatientTable({ patients }) {
               const days = daysBetween(p.last_contact_date);
               const daysCls = days>60?'days-crit':days>30?'days-warn':'days-ok';
               const daysLbl = days>=999?'Unknown':`${days}d ago`;
-              const phqCls = p.phq9.score>=15||p.phq9.si_present?'high':p.phq9.score>=10?'mod':'';
-              const phqLbl = p.phq9.score+(p.phq9.si_present?' ⚠':'');
-              const overdueCnt = KPI_NAMES.filter(k=>p.kpis[k].overdue).length;
               return [
                 <tr
                   key={p.id}
@@ -102,16 +104,29 @@ export default function PatientTable({ patients }) {
                     <span className="pt-name">{p.name}</span>
                     <span className="pt-id">{p.id}</span>
                   </td>
-                  <td>{p.provider}</td>
-                  <td><span className={`phq-score ${phqCls}`}>{phqLbl}</span></td>
-                  <td><span className={`ssrs-badge ${p.ssrs.risk_level}`}>{p.ssrs.risk_level}</span></td>
-                  <td><span className={daysCls}>{daysLbl}</span></td>
                   <td>
-                    {overdueCnt>0
-                      ? <span className="overdue-count">{overdueCnt}</span>
-                      : <span className="overdue-zero">—</span>
-                    }
+                    <span className={`risk-pill risk-pill-${p.risk_level.toLowerCase()}`}>
+                      {p.risk_level}
+                    </span>
                   </td>
+                  <td className="diag-cell">
+                    {p.diagnoses && p.diagnoses.length > 0
+                      ? p.diagnoses[0].description
+                      : '—'}
+                  </td>
+                  <td>
+                    <div className="kpi-dot-row">
+                      {KPI_NAMES.map(k => (
+                        <span
+                          key={k}
+                          className={`kpi-dot ${p.kpis[k].overdue ? 'kpi-dot-red' : 'kpi-dot-green'}`}
+                          title={`${KPI_DISPLAY[k]}: ${p.kpis[k].overdue ? 'overdue' : 'compliant'}`}
+                        />
+                      ))}
+                    </div>
+                  </td>
+                  <td><span className={daysCls}>{daysLbl}</span></td>
+                  <td className="provider-cell">{p.provider}</td>
                 </tr>,
                 isExp && (
                   <tr key={`detail-${p.id}`} className="detail-row">
