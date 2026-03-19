@@ -1,29 +1,18 @@
-const ALLOWED_ORIGINS = new Set([
-  'https://samitcheema.github.io',
-  'https://clinicalmind-ai.pages.dev',
-]);
-
 const ALLOWED_TABLES = new Set(['patients']);
 
-function corsHeaders(origin) {
-  const allowed = ALLOWED_ORIGINS.has(origin) ? origin : [...ALLOWED_ORIGINS][0];
-  return {
-    'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'content-type, x-api-key, anthropic-version, anthropic-dangerous-allow-browser',
-    'Access-Control-Max-Age': '86400',
-  };
-}
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'content-type, x-api-key, anthropic-version, anthropic-dangerous-allow-browser',
+  'Access-Control-Max-Age': '86400',
+};
 
-function addCors(headers, origin) {
-  for (const [k, v] of Object.entries(corsHeaders(origin))) headers.set(k, v);
+function addCors(headers) {
+  for (const [k, v] of Object.entries(CORS)) headers.set(k, v);
 }
 
 export default {
   async fetch(request, env) {
-    const origin = request.headers.get('Origin') || '';
-    const CORS = corsHeaders(origin);
-
     try {
       const url = new URL(request.url);
 
@@ -48,7 +37,7 @@ export default {
           },
         });
         const resHeaders = new Headers(upstream.headers);
-        addCors(resHeaders, origin);
+        addCors(resHeaders);
         return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
       }
 
@@ -70,7 +59,7 @@ export default {
       });
 
       const resHeaders = new Headers(response.headers);
-      addCors(resHeaders, origin);
+      addCors(resHeaders);
 
       return new Response(response.body, { status: response.status, headers: resHeaders });
     } catch (_) {
