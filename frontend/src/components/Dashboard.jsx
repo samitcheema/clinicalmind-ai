@@ -3,6 +3,13 @@ import { KPI_NAMES, KPI_DISPLAY } from '../utils/dataTransform.js';
 import { offsetDate, TODAY, fmtDate } from '../utils/mockGenerators.js';
 import PatientTable from './PatientTable.jsx';
 
+const CARD_META = {
+  patients:   { trend:'↑ 3 wk',  trendCls:'trend-up',      sparkPts:'0,15 20,13 40,14 60,10 80,11 100,8 120,6', stroke:'var(--primary)' },
+  high_risk:  { trend:'— same',  trendCls:'trend-neutral',  sparkPts:'0,10 20,8 40,12 60,9 80,11 100,8 120,9',  stroke:'var(--red)'     },
+  crisis_7d:  { trend:'↓ 1 7d',  trendCls:'trend-down',    sparkPts:'0,12 20,14 40,10 60,13 80,8 100,11 120,8', stroke:'var(--amber)'   },
+  kpi:        { trend:'↑ 4% mo', trendCls:'trend-up',      sparkPts:'0,14 20,13 40,12 60,11 80,10 100,9 120,7', stroke:'var(--green)'   },
+};
+
 function computeStats(patients) {
   const total = patients.length;
   if (!total) return null;
@@ -47,38 +54,65 @@ export default function Dashboard({ patients, loading }) {
     );
   }
 
-  const kpiColor = s.overallPct >= 75 ? 'green' : 'amber';
-  const crisisColor = s.activeCrisis > 0 ? 'red' : 'green';
+  const overdueTotal = KPI_NAMES.reduce((sum, k) => sum + s.kpiStats[k].overdue, 0);
+  const kpiColor = overdueTotal === 0 ? 'green' : 'amber';
 
   return (
     <div className="dashboard-pane">
       <div className="dash-inner">
 
         {/* Stat Cards */}
-        <div className="stat-cards">
+        <div className="stat-grid">
           <div className="stat-card blue">
-            <span className="sc-icon">👥</span>
-            <div className="sc-label">Total Patients</div>
+            <div className="sc-top">
+              <div className="sc-icon" style={{ background:'var(--blue-bg)' }}>👥</div>
+              <span className={`sc-trend ${CARD_META.patients.trendCls}`}>{CARD_META.patients.trend}</span>
+            </div>
+            <div className="sc-label">TOTAL PATIENTS</div>
             <div className="sc-value">{s.total}</div>
-            <div className="sc-sub">Active caseload</div>
+            <div className="sc-sub">{s.byRisk.High} high · {s.byRisk.Moderate} moderate</div>
+            <svg className="sc-sparkline" viewBox="0 0 120 20" preserveAspectRatio="none">
+              <polyline points={CARD_META.patients.sparkPts} fill="none" stroke={CARD_META.patients.stroke} strokeWidth="1.5" opacity="0.6"/>
+            </svg>
           </div>
+
           <div className="stat-card red">
-            <span className="sc-icon">⚠️</span>
-            <div className="sc-label">High Risk</div>
-            <div className={`sc-value ${s.byRisk.High>0?'red':''}`}>{s.byRisk.High}</div>
-            <div className="sc-sub">{Math.round(s.byRisk.High/s.total*100)}% of caseload</div>
+            <div className="sc-top">
+              <div className="sc-icon" style={{ background:'var(--red-bg)' }}>⚠️</div>
+              <span className={`sc-trend ${CARD_META.high_risk.trendCls}`}>{CARD_META.high_risk.trend}</span>
+            </div>
+            <div className="sc-label">HIGH RISK</div>
+            <div className="sc-value" style={{ color:'var(--red)' }}>{s.byRisk.High}</div>
+            <div className="sc-sub">{s.alerts.filter(a => a.level === 'red').length} need review</div>
+            <svg className="sc-sparkline" viewBox="0 0 120 20" preserveAspectRatio="none">
+              <polyline points={CARD_META.high_risk.sparkPts} fill="none" stroke={CARD_META.high_risk.stroke} strokeWidth="1.5" opacity="0.6"/>
+            </svg>
           </div>
+
+          <div className="stat-card amber">
+            <div className="sc-top">
+              <div className="sc-icon" style={{ background:'var(--amber-bg)' }}>🚨</div>
+              <span className={`sc-trend ${CARD_META.crisis_7d.trendCls}`}>{CARD_META.crisis_7d.trend}</span>
+            </div>
+            <div className="sc-label">CRISIS EVENTS (7D)</div>
+            <div className="sc-value" style={{ color:'var(--amber)' }}>{s.activeCrisis}</div>
+            <div className="sc-sub">active unresolved events</div>
+            <svg className="sc-sparkline" viewBox="0 0 120 20" preserveAspectRatio="none">
+              <polyline points={CARD_META.crisis_7d.sparkPts} fill="none" stroke={CARD_META.crisis_7d.stroke} strokeWidth="1.5" opacity="0.6"/>
+            </svg>
+          </div>
+
           <div className={`stat-card ${kpiColor}`}>
-            <span className="sc-icon">📋</span>
-            <div className="sc-label">KPI Compliance</div>
+            <div className="sc-top">
+              <div className="sc-icon" style={{ background:'var(--green-bg)' }}>📋</div>
+              <span className={`sc-trend ${CARD_META.kpi.trendCls}`}>{CARD_META.kpi.trend}</span>
+            </div>
+            <div className="sc-label">KPI COMPLIANCE</div>
             <div className={`sc-value ${kpiColor}`}>{s.overallPct}%</div>
-            <div className="sc-sub">Target: 75%</div>
-          </div>
-          <div className={`stat-card ${crisisColor}`}>
-            <span className="sc-icon">🚨</span>
-            <div className="sc-label">Active Crisis</div>
-            <div className={`sc-value ${crisisColor}`}>{s.activeCrisis}</div>
-            <div className="sc-sub">Admitted to crisis unit</div>
+            <div className="sc-sub">overall across all KPIs</div>
+            <svg className="sc-sparkline" viewBox="0 0 120 20" preserveAspectRatio="none">
+              <polyline points={CARD_META.kpi.sparkPts} fill="none" stroke={CARD_META.kpi.stroke} strokeWidth="1.5" opacity="0.6"/>
+            </svg>
           </div>
         </div>
 
@@ -86,7 +120,7 @@ export default function Dashboard({ patients, loading }) {
         <div className="mid-row">
           {/* KPI Panel */}
           <div className="panel">
-            <div className="panel-title">KPI Compliance vs 75% Target</div>
+            <div className="panel-title">KPI Compliance</div>
             {KPI_NAMES.map(k => {
               const pct = s.kpiStats[k].pct;
               const cls = pct >= 75 ? 'meets' : 'below';
