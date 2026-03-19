@@ -34,14 +34,14 @@ export default function PatientTable({ patients }) {
       switch(sort.col) {
         case 'name':    va=a.name;          vb=b.name;          break;
         case 'risk': {
-          const order = { High:0, Moderate:1, Low:2 };
+          const order = { High:2, Moderate:1, Low:0 };
           va = order[a.risk_level] ?? 3;
           vb = order[b.risk_level] ?? 3;
           break;
         }
         case 'contact': va=a.last_contact_date||'';      vb=b.last_contact_date||'';     break;
-        case 'overdue': va=KPI_NAMES.filter(k=>a.kpis[k].overdue).length;
-                        vb=KPI_NAMES.filter(k=>b.kpis[k].overdue).length; break;
+        case 'overdue': va=KPI_NAMES.filter(k=>a.kpis[k]?.overdue).length;
+                        vb=KPI_NAMES.filter(k=>b.kpis[k]?.overdue).length; break;
         default: va=0; vb=0;
       }
       const cmp = typeof va==='string' ? va.localeCompare(vb) : (va-vb);
@@ -98,7 +98,12 @@ export default function PatientTable({ patients }) {
                   onClick={() => toggleExpand(p.id)}
                 >
                   <td onClick={e => e.stopPropagation()}>
-                    <button className="expand-btn" onClick={() => toggleExpand(p.id)}>{isExp?'▼':'▶'}</button>
+                    <button
+                      className="expand-btn"
+                      onClick={() => toggleExpand(p.id)}
+                      aria-label={isExp ? 'Collapse patient' : 'Expand patient'}
+                      aria-expanded={isExp}
+                    >{isExp?'▼':'▶'}</button>
                   </td>
                   <td>
                     <span className="pt-name">{p.name}</span>
@@ -119,8 +124,8 @@ export default function PatientTable({ patients }) {
                       {KPI_NAMES.map(k => (
                         <span
                           key={k}
-                          className={`kpi-dot ${p.kpis[k].overdue ? 'kpi-dot-red' : 'kpi-dot-green'}`}
-                          title={`${KPI_DISPLAY[k]}: ${p.kpis[k].overdue ? 'overdue' : 'compliant'}`}
+                          className={`kpi-dot ${p.kpis[k]?.overdue ? 'kpi-dot-red' : 'kpi-dot-green'}`}
+                          title={`${KPI_DISPLAY[k]}: ${p.kpis[k]?.overdue ? 'overdue' : 'compliant'}`}
                         />
                       ))}
                     </div>
