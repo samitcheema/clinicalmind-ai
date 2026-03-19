@@ -19,7 +19,7 @@ export default function Topbar({ status }) {
           className="badge-pill"
           onClick={() => setTheme(THEME_CYCLE[theme])}
           title={`Theme: ${theme}`}
-          style={{ cursor: 'pointer', background: 'none', border: '1px solid var(--border)', fontSize: '13px' }}
+          style={{ cursor: 'pointer', fontSize: '13px', minWidth: '28px', textAlign: 'center' }}
         >
           {THEME_ICON[theme]}
         </button>
