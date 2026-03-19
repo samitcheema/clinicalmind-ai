@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import Header from './components/Header.jsx';
+import Sidebar from './components/Sidebar';
+import Topbar  from './components/Topbar';
 import Dashboard from './components/Dashboard.jsx';
+import PatientTable from './components/PatientTable.jsx';
 import ChatPane from './components/ChatPane.jsx';
 import { loadPatients } from './utils/dataTransform.js';
 
 export default function App() {
   const [patients, setPatients] = useState([]);
   const [status, setStatus] = useState({ state: 'loading', msg: 'Loading data…' });
-  const [tab, setTab] = useState('dashboard');
+  const [activeView, setActiveView] = useState('dashboard');
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('cm_api_key') || '');
   const [showApiSetup, setShowApiSetup] = useState(false);
 
@@ -23,15 +25,29 @@ export default function App() {
     setShowApiSetup(false);
   }
 
-  function handleTabChange(t) {
-    setTab(t);
-    if (t === 'chat' && !apiKey) setShowApiSetup(true);
-    if (t === 'dashboard') setShowApiSetup(false);
-  }
-
   return (
-    <div className="app">
-      <Header status={status} />
+    <div className="app-shell">
+      <Sidebar
+        activeView={activeView}
+        onNavigate={setActiveView}
+        onNeedKey={() => setShowApiSetup(true)}
+        apiKey={apiKey}
+        patients={patients}
+      />
+      <div className="main-area">
+        <Topbar status={status} />
+        <div className="content-scroll">
+          {activeView === 'dashboard' && <Dashboard patients={patients} loading={status.state === 'loading'} />}
+          {activeView === 'patients'  && <PatientTable patients={patients} />}
+          {activeView === 'chat'      && (
+            <ChatPane
+              patients={patients}
+              apiKey={apiKey}
+              onNeedKey={() => setShowApiSetup(true)}
+            />
+          )}
+        </div>
+      </div>
       {showApiSetup && (
         <div className="api-setup">
           <label htmlFor="api-input">Anthropic API Key</label>
@@ -47,20 +63,6 @@ export default function App() {
           <span className="api-note">Stored in your browser only</span>
         </div>
       )}
-      <nav className="tab-nav">
-        <button className={`tab-btn ${tab==='dashboard'?'active':''}`} onClick={() => handleTabChange('dashboard')}>📊 Dashboard</button>
-        <button className={`tab-btn ${tab==='chat'?'active':''}`} onClick={() => handleTabChange('chat')}>💬 AI Chat</button>
-      </nav>
-      <div className="content">
-        {tab === 'dashboard'
-          ? <Dashboard patients={patients} loading={status.state==='loading'} />
-          : <ChatPane patients={patients} apiKey={apiKey} onNeedKey={() => setShowApiSetup(true)} />
-        }
-      </div>
-      <footer className="footer">
-        <a href="https://github.com/samitcheema/clinicalmind-ai" target="_blank" rel="noreferrer">GitHub</a>
-        {' · Synthetic data only · Not for clinical use'}
-      </footer>
     </div>
   );
 }

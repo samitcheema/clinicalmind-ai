@@ -58,8 +58,9 @@ body {
 
 /* ── API Setup ── */
 .api-setup {
-  background: #fffbeb;
-  border-bottom: 1px solid #fde68a;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
   padding: 9px 24px;
   display: flex;
   align-items: center;
@@ -67,20 +68,21 @@ body {
   flex-shrink: 0;
   flex-wrap: wrap;
 }
-.api-setup label { font-size: 13px; font-weight: 500; color: #92400e; }
+.api-setup label { font-size: 13px; font-weight: 500; color: var(--text); }
 .api-input {
   padding: 5px 10px;
-  border: 1px solid #fcd34d;
+  border: 1px solid var(--border);
   border-radius: 6px;
   font-size: 13px;
   font-family: monospace;
-  background: white;
+  background: var(--bg);
+  color: var(--text);
   min-width: 240px;
 }
-.api-input:focus { outline: none; border-color: #f59e0b; box-shadow: 0 0 0 2px rgba(245,158,11,.2); }
+.api-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
 .api-btn {
   padding: 5px 14px;
-  background: #f59e0b;
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: 6px;
@@ -89,8 +91,8 @@ body {
   cursor: pointer;
   font-family: inherit;
 }
-.api-btn:hover { background: #d97706; }
-.api-note { font-size: 11px; color: #92400e; }
+.api-btn:hover { background: var(--primary-dark); }
+.api-note { font-size: 11px; color: var(--text-4); }
 
 
 /* ── Content ── */
@@ -404,3 +406,7 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .topbar-right { display:flex; align-items:center; gap:10px; }
 .badge-pill   { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:4px 10px; font-size:10px; color:var(--text-3); display:flex; align-items:center; gap:5px; }
 
+/* ── App shell ───────────────────────────────────────── */
+.app-shell      { display:flex; height:100vh; overflow:hidden; background:var(--bg); }
+.main-area      { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.content-scroll { flex:1; overflow-y:auto; padding:16px 20px; background:var(--bg); }
