@@ -5,7 +5,6 @@ import PatientTable from './PatientTable.jsx';
 
 const CARD_META = {
   patients:   { trend:'↑ 3 wk',  trendCls:'trend-up',      sparkPts:'0,15 20,13 40,14 60,10 80,11 100,8 120,6', stroke:'var(--primary)' },
-  high_risk:  { trend:'— same',  trendCls:'trend-neutral',  sparkPts:'0,10 20,8 40,12 60,9 80,11 100,8 120,9',  stroke:'var(--red)'     },
   crisis_7d:  { trend:'↓ 1 7d',  trendCls:'trend-down',    sparkPts:'0,12 20,14 40,10 60,13 80,8 100,11 120,8', stroke:'var(--amber)'   },
   kpi:        { trend:'↑ 4% mo', trendCls:'trend-up',      sparkPts:'0,14 20,13 40,12 60,11 80,10 100,9 120,7', stroke:'var(--green)'   },
 };
@@ -13,9 +12,6 @@ const CARD_META = {
 function computeStats(patients) {
   const total = patients.length;
   if (!total) return null;
-  const byRisk = { High:0, Moderate:0, Low:0 };
-  for (const p of patients) byRisk[p.risk_level] = (byRisk[p.risk_level]||0)+1;
-
   const kpiStats = {};
   for (const k of KPI_NAMES) {
     const overdue = patients.filter(p=>p.kpis[k].overdue).length;
@@ -39,7 +35,7 @@ function computeStats(patients) {
       alerts.push({ name:p.name, reason:`PHQ-9 score ${p.phq9.score} (Severe)`, level:'amber', id:p.id });
   }
 
-  return { total, byRisk, kpiStats, overdueTotal, overallPct, activeCrisis, alerts };
+  return { total, kpiStats, overdueTotal, overallPct, activeCrisis, alerts };
 }
 
 export default function Dashboard({ patients, loading }) {
@@ -71,22 +67,9 @@ export default function Dashboard({ patients, loading }) {
             </div>
             <div className="sc-label">TOTAL PATIENTS</div>
             <div className="sc-value">{s.total}</div>
-            <div className="sc-sub">{s.byRisk.High} high · {s.byRisk.Moderate} moderate</div>
+            <div className="sc-sub">{s.activeCrisis} active crisis events</div>
             <svg className="sc-sparkline" viewBox="0 0 120 20" preserveAspectRatio="none">
               <polyline points={CARD_META.patients.sparkPts} fill="none" stroke={CARD_META.patients.stroke} strokeWidth="1.5" opacity="0.6"/>
-            </svg>
-          </div>
-
-          <div className="stat-card red">
-            <div className="sc-top">
-              <div className="sc-icon" style={{ background:'var(--red-bg)' }}>⚠️</div>
-              <span className={`sc-trend ${CARD_META.high_risk.trendCls}`}>{CARD_META.high_risk.trend}</span>
-            </div>
-            <div className="sc-label">HIGH RISK</div>
-            <div className="sc-value" style={{ color:'var(--red)' }}>{s.byRisk.High}</div>
-            <div className="sc-sub">{s.alerts.filter(a => a.level === 'red').length} need review</div>
-            <svg className="sc-sparkline" viewBox="0 0 120 20" preserveAspectRatio="none">
-              <polyline points={CARD_META.high_risk.sparkPts} fill="none" stroke={CARD_META.high_risk.stroke} strokeWidth="1.5" opacity="0.6"/>
             </svg>
           </div>
 
@@ -154,26 +137,6 @@ export default function Dashboard({ patients, loading }) {
             <div className="panel-avg">
               Avg <strong>{s.overallPct}%</strong> across {KPI_NAMES.length} KPIs
             </div>
-          </div>
-
-          {/* Risk Panel */}
-          <div className="panel">
-            <div className="panel-title">Risk Distribution</div>
-            {['High','Moderate','Low'].map(r => {
-              const cnt = s.byRisk[r]||0;
-              const pct = Math.round(cnt/s.total*100);
-              return (
-                <div key={r} className="risk-item">
-                  <div className="risk-item-header">
-                    <span className={`risk-lbl ${r}`}>{r}</span>
-                    <span className="risk-cnt">{cnt} <small style={{color:'#94a3b8',fontWeight:400}}>({pct}%)</small></span>
-                  </div>
-                  <div className="risk-bar">
-                    <div className={`risk-bar-fill ${r}`} style={{width:`${pct}%`}} />
-                  </div>
-                </div>
-              );
-            })}
           </div>
 
           {/* Alerts Panel */}
