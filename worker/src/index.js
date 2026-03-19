@@ -1,9 +1,12 @@
-const ALLOWED_ORIGIN = 'https://samitcheema.github.io';
+const ALLOWED_ORIGINS = new Set([
+  'https://samitcheema.github.io',
+  'https://clinicalmind-ai.pages.dev',
+]);
 
 const ALLOWED_TABLES = new Set(['patients']);
 
 function corsHeaders(origin) {
-  const allowed = origin === ALLOWED_ORIGIN ? origin : ALLOWED_ORIGIN;
+  const allowed = ALLOWED_ORIGINS.has(origin) ? origin : [...ALLOWED_ORIGINS][0];
   return {
     'Access-Control-Allow-Origin': allowed,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
