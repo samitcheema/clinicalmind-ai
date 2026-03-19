@@ -39,7 +39,7 @@ function computeStats(patients) {
       alerts.push({ name:p.name, reason:`PHQ-9 score ${p.phq9.score} (Severe)`, level:'amber', id:p.id });
   }
 
-  return { total, byRisk, kpiStats, overallPct, activeCrisis, alerts };
+  return { total, byRisk, kpiStats, overdueTotal, overallPct, activeCrisis, alerts };
 }
 
 export default function Dashboard({ patients, loading }) {
@@ -55,7 +55,7 @@ export default function Dashboard({ patients, loading }) {
     );
   }
 
-  const overdueTotal = KPI_NAMES.reduce((sum, k) => sum + s.kpiStats[k].overdue, 0);
+  const overdueTotal = s.overdueTotal;
   const kpiColor = overdueTotal === 0 ? 'green' : 'amber';
 
   return (
@@ -105,7 +105,7 @@ export default function Dashboard({ patients, loading }) {
 
           <div className={`stat-card ${kpiColor}`}>
             <div className="sc-top">
-              <div className="sc-icon" style={{ background:'var(--green-bg)' }}>📋</div>
+              <div className="sc-icon" style={{ background: kpiColor === 'green' ? 'var(--green-bg)' : 'var(--amber-bg)' }}>📋</div>
               <span className={`sc-trend ${CARD_META.kpi.trendCls}`}>{CARD_META.kpi.trend}</span>
             </div>
             <div className="sc-label">KPI COMPLIANCE</div>
