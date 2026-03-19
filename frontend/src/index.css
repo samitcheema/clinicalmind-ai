@@ -50,6 +50,7 @@ body {
   --ring-track:   #e8e2da;
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.08);
   --shadow:       0 4px 6px rgba(0,0,0,0.10);
+  --primary-900:  #dbeafe;
 }
 
 /* ── Scrollbars ── */
