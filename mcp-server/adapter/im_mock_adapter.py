@@ -13,12 +13,11 @@ Interface:
 from __future__ import annotations
 
 from datetime import date
-from typing import Optional
 from data.im_mock_data import generate_im_patients
 
 
 def _patients() -> list[dict]:
-    return generate_im_patients()
+    return [p for p in generate_im_patients() if p.get("specialty") == "IM"]
 
 
 def _latest(history: list[dict], key: str):
