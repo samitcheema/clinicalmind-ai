@@ -23,6 +23,10 @@ build/
 
 # Wrangler
 worker/.wrangler/
+.wrangler/
+
+# Claude Code / superpowers artifacts
+.superpowers/
 
 # Synthea — large generated/binary files (not suitable for git)
 synthea-with-dependencies.jar
