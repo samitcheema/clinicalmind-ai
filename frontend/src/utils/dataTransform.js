@@ -3,7 +3,6 @@ import { getMockPatients } from './mockSeeds.js';
 
 export const KPI_NAMES   = ['bha','sra','aims','whodas','phq9','beh_tp','beh_csp'];
 export const KPI_DISPLAY = { bha:'BHA', sra:'SRA', aims:'AIMS', whodas:'WHODAS', phq9:'PHQ-9', beh_tp:'BEH-TP', beh_csp:'BEH-CSP' };
-export const RISK_ORDER  = { High:0, Moderate:1, Low:2 };
 export const PHQ9_ITEMS  = ['Interest','Feeling Hopeless','Trouble Sleeping','Feeling Tired','Poor Appetite','Feeling Bad','Trouble Concentrating','Moving Slowly','Better Off Dead'];
 
 function _latest(arr) {
