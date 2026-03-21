@@ -12,6 +12,8 @@
 - `.superpowers/` — Claude Code brainstorm artifacts; not project code
 - `.wrangler/` — Wrangler cache at repo root (only `worker/.wrangler/` was excluded before)
 
+Both directories are currently **untracked** (not yet in git history), so no `git rm --cached` is needed. The fix is purely additive: append two lines to `.gitignore` and commit.
+
 ### Tracked file review
 - `docs/assets/` (compiled JS/CSS) — intentionally tracked for GitHub Pages; leave as-is
 - `synthea-with-dependencies.jar` and `synthea_out/` — already gitignored, local workspace clutter only; no git action needed
@@ -23,7 +25,7 @@
 Scan all files for and remove:
 - Unused imports
 - Dead code and commented-out blocks
-- Stray `console.log` statements
+- Stray `console.log` statements (candidates for removal; preserve any that are the sole user-visible output of a standalone utility function)
 - Utility functions in `frontend/src/utils/` that are defined but never called anywhere
 
 No restructuring. Changes stay within existing files.
@@ -54,12 +56,17 @@ Scan all Python scripts for and remove:
 - `pipeline/seed.py`
 - `pipeline/seed_mock.py`
 - `pipeline/generate_fhir.py`
+- `pipeline/stages/__init__.py`
 - `pipeline/stages/extract.py`
 - `pipeline/stages/load.py`
 - `pipeline/stages/standardize.py`
 - `pipeline/stages/transform.py`
 
 **Approach:** `seed_mock.py` and `generate_fhir.py` are treated as standalone utilities — remove internal dead code only, do not restructure or remove the scripts themselves.
+
+`pipeline/supabase_schema.sql` is a SQL file and falls under the "source SQL out of scope" rule — do not modify it.
+
+**Logging heuristic:** Calls via the `logging` module are always preserved. Bare `print()` calls are candidates for removal unless they are the only user-visible progress indicator for a standalone utility script (e.g., a top-level status message in `seed_mock.py` or `generate_fhir.py`).
 
 ---
 
