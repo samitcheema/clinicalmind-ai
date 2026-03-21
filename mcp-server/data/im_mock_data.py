@@ -10,7 +10,7 @@ Risk classification:
   Low      — A1c < 7.5, eGFR > 45, BP controlled
 """
 
-from datetime import date, timedelta
+from datetime import date
 from functools import lru_cache
 
 TODAY = date(2026, 3, 21)
@@ -66,10 +66,10 @@ def generate_im_patients() -> list[dict]:
             ],
             "preventive_care": {
                 "colonoscopy":         {"last_done": "2018-04-01", "due_date": "2028-04-01", "overdue": False},
-                "flu_vaccine":         {"last_done": "2024-10-01", "due_date": "2025-10-01", "overdue": False},
+                "flu_vaccine":         {"last_done": "2024-10-01", "due_date": "2025-10-01", "overdue": True},
                 "eye_exam_diabetic":   {"last_done": "2024-01-15", "due_date": "2025-01-15", "overdue": True},
-                "microalbumin":        {"last_done": "2024-06-01", "due_date": "2025-06-01", "overdue": False},
-                "foot_exam_diabetic":  {"last_done": "2024-06-01", "due_date": "2025-06-01", "overdue": False},
+                "microalbumin":        {"last_done": "2024-06-01", "due_date": "2025-06-01", "overdue": True},
+                "foot_exam_diabetic":  {"last_done": "2024-06-01", "due_date": "2025-06-01", "overdue": True},
             },
             "last_visit_date":       "2025-12-15",
             "days_since_last_visit": _days_since("2025-12-15"),
@@ -114,10 +114,10 @@ def generate_im_patients() -> list[dict]:
             ],
             "preventive_care": {
                 "colonoscopy":         {"last_done": "2020-02-10", "due_date": "2030-02-10", "overdue": False},
-                "flu_vaccine":         {"last_done": "2024-10-15", "due_date": "2025-10-15", "overdue": False},
-                "eye_exam_diabetic":   {"last_done": "2025-01-20", "due_date": "2026-01-20", "overdue": False},
+                "flu_vaccine":         {"last_done": "2024-10-15", "due_date": "2025-10-15", "overdue": True},
+                "eye_exam_diabetic":   {"last_done": "2025-01-20", "due_date": "2026-01-20", "overdue": True},
                 "microalbumin":        {"last_done": "2024-03-01", "due_date": "2025-03-01", "overdue": True},
-                "foot_exam_diabetic":  {"last_done": "2024-09-01", "due_date": "2025-09-01", "overdue": False},
+                "foot_exam_diabetic":  {"last_done": "2024-09-01", "due_date": "2025-09-01", "overdue": True},
             },
             "last_visit_date":       "2026-01-15",
             "days_since_last_visit": _days_since("2026-01-15"),
@@ -196,9 +196,9 @@ def generate_im_patients() -> list[dict]:
             "preventive_care": {
                 "colonoscopy":        {"last_done": "2021-03-01", "due_date": "2031-03-01", "overdue": False},
                 "flu_vaccine":        {"last_done": "2025-10-01", "due_date": "2026-10-01", "overdue": False},
-                "eye_exam_diabetic":  {"last_done": "2025-02-01", "due_date": "2026-02-01", "overdue": False},
-                "microalbumin":       {"last_done": "2024-09-01", "due_date": "2025-09-01", "overdue": False},
-                "foot_exam_diabetic": {"last_done": "2024-09-01", "due_date": "2025-09-01", "overdue": False},
+                "eye_exam_diabetic":  {"last_done": "2025-02-01", "due_date": "2026-02-01", "overdue": True},
+                "microalbumin":       {"last_done": "2024-09-01", "due_date": "2025-09-01", "overdue": True},
+                "foot_exam_diabetic": {"last_done": "2024-09-01", "due_date": "2025-09-01", "overdue": True},
             },
             "last_visit_date":       "2026-01-01",
             "days_since_last_visit": _days_since("2026-01-01"),
@@ -313,9 +313,9 @@ def generate_im_patients() -> list[dict]:
             "preventive_care": {
                 "colonoscopy":        {"last_done": None,         "due_date": "2025-08-22", "overdue": True},
                 "flu_vaccine":        {"last_done": "2025-10-01", "due_date": "2026-10-01", "overdue": False},
-                "eye_exam_diabetic":  {"last_done": "2025-03-01", "due_date": "2026-03-01", "overdue": False},
-                "microalbumin":       {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": False},
-                "foot_exam_diabetic": {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": False},
+                "eye_exam_diabetic":  {"last_done": "2025-03-01", "due_date": "2026-03-01", "overdue": True},
+                "microalbumin":       {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": True},
+                "foot_exam_diabetic": {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": True},
             },
             "last_visit_date":       "2026-01-01",
             "days_since_last_visit": _days_since("2026-01-01"),
@@ -352,7 +352,7 @@ def generate_im_patients() -> list[dict]:
             "preventive_care": {
                 "colonoscopy":  {"last_done": "2022-09-01", "due_date": "2032-09-01", "overdue": False},
                 "flu_vaccine":  {"last_done": "2025-10-01", "due_date": "2026-10-01", "overdue": False},
-                "mammogram":    {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": False},
+                "mammogram":    {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": True},
             },
             "last_visit_date":       "2025-12-01",
             "days_since_last_visit": _days_since("2025-12-01"),
@@ -390,9 +390,9 @@ def generate_im_patients() -> list[dict]:
             "preventive_care": {
                 "colonoscopy":        {"last_done": None,         "due_date": "2030-05-17", "overdue": False},
                 "flu_vaccine":        {"last_done": "2025-10-01", "due_date": "2026-10-01", "overdue": False},
-                "eye_exam_diabetic":  {"last_done": "2025-02-01", "due_date": "2026-02-01", "overdue": False},
-                "microalbumin":       {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": False},
-                "foot_exam_diabetic": {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": False},
+                "eye_exam_diabetic":  {"last_done": "2025-02-01", "due_date": "2026-02-01", "overdue": True},
+                "microalbumin":       {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": True},
+                "foot_exam_diabetic": {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": True},
             },
             "last_visit_date":       "2026-01-01",
             "days_since_last_visit": _days_since("2026-01-01"),
@@ -474,7 +474,7 @@ def generate_im_patients() -> list[dict]:
                 "colonoscopy":        {"last_done": "2018-01-01", "due_date": "2028-01-01", "overdue": False},
                 "flu_vaccine":        {"last_done": "2023-10-01", "due_date": "2024-10-01", "overdue": True},
                 "eye_exam_diabetic":  {"last_done": "2023-06-01", "due_date": "2024-06-01", "overdue": True},
-                "microalbumin":       {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": False},
+                "microalbumin":       {"last_done": "2025-01-01", "due_date": "2026-01-01", "overdue": True},
                 "foot_exam_diabetic": {"last_done": "2023-09-01", "due_date": "2024-09-01", "overdue": True},
             },
             "last_visit_date":       "2026-01-01",
@@ -510,7 +510,7 @@ def generate_im_patients() -> list[dict]:
             "preventive_care": {
                 "colonoscopy":  {"last_done": None,         "due_date": "2034-10-05", "overdue": False},
                 "flu_vaccine":  {"last_done": "2025-10-01", "due_date": "2026-10-01", "overdue": False},
-                "mammogram":    {"last_done": "2024-11-01", "due_date": "2025-11-01", "overdue": False},
+                "mammogram":    {"last_done": "2024-11-01", "due_date": "2025-11-01", "overdue": True},
             },
             "last_visit_date":       "2025-09-01",
             "days_since_last_visit": _days_since("2025-09-01"),
