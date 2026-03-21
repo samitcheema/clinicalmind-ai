@@ -15,8 +15,6 @@ Output: clinic_stats dict, StageResult
 """
 from __future__ import annotations
 
-
-
 import json
 import os
 import sys

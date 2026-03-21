@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import json
 import re
-from datetime import datetime
 
 def _clean(s: str) -> str:
     """Strip trailing digit suffixes Synthea appends to name tokens (e.g. 'Jones123' → 'Jones')."""
