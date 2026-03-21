@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS providers (
     provider_id  TEXT PRIMARY KEY,
     name         TEXT NOT NULL,
     team         TEXT NOT NULL,
+    specialty    TEXT NOT NULL DEFAULT 'BH',   -- BH | IM
     created_at   TIMESTAMPTZ DEFAULT NOW()
 );
 
