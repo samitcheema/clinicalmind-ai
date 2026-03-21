@@ -1,6 +1,5 @@
 """Tests for the IM mock adapter — run from mcp-server/ directory."""
 
-import pytest
 from adapter.im_mock_adapter import (
     get_im_patients,
     get_im_patient_detail,
@@ -67,6 +66,7 @@ def test_get_im_patient_detail_unknown_returns_none():
 
 def test_get_chronic_disease_panel_diabetes():
     result = get_chronic_disease_panel("diabetes")
+    assert len(result) > 0, "Should return at least one poorly-controlled diabetic (A1c > 8.0)"
     # All returned patients should have latest A1c > 8.0
     for p in result:
         assert p["latest_a1c"] > 8.0, f"{p['patient_id']} has A1c {p['latest_a1c']}"
@@ -77,6 +77,7 @@ def test_get_chronic_disease_panel_diabetes():
 
 def test_get_chronic_disease_panel_ckd():
     result = get_chronic_disease_panel("ckd")
+    assert len(result) > 0, "Should return at least one patient with declining eGFR (slope ≤ -3/yr)"
     # All should have a declining eGFR slope (≤ -3/yr)
     for p in result:
         assert p["egfr_slope"] <= -3, f"{p['patient_id']} slope {p['egfr_slope']}"
@@ -87,6 +88,7 @@ def test_get_chronic_disease_panel_ckd():
 
 def test_get_chronic_disease_panel_hypertension():
     result = get_chronic_disease_panel("hypertension")
+    assert len(result) > 0, "Should return at least one patient with uncontrolled hypertension (systolic > 140)"
     # All should have latest systolic > 140
     for p in result:
         assert p["latest_systolic"] > 140, f"{p['patient_id']} BP {p['latest_systolic']}"
@@ -99,11 +101,13 @@ def test_get_chronic_disease_panel_hypertension():
 
 def test_get_preventive_care_gaps_returns_only_overdue():
     result = get_preventive_care_gaps()
+    assert len(result) > 0, "Should return at least one patient with overdue preventive care"
     for entry in result:
         assert len(entry["overdue_items"]) > 0, f"{entry['patient_id']} has no overdue items"
 
 
 def test_get_preventive_care_gaps_filter_by_type():
     result = get_preventive_care_gaps(gap_type="flu_vaccine")
+    assert len(result) > 0, "Should return at least one patient with overdue flu_vaccine"
     for entry in result:
         assert any(item["type"] == "flu_vaccine" for item in entry["overdue_items"])
