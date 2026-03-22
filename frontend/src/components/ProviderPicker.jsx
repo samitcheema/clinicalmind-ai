@@ -26,7 +26,7 @@ export default function ProviderPicker() {
     <div className="provider-picker-overlay">
       <div className="provider-picker">
         <div className="picker-logo">
-          <div className="logo-text" style={{ fontSize: '20px' }}>ClinicalMind</div>
+          <div className="picker-logo-title">ClinicalMind</div>
           <div className="logo-sub">Select your profile to continue</div>
         </div>
 
@@ -34,16 +34,16 @@ export default function ProviderPicker() {
           <>
             <h2 className="picker-heading">Choose your specialty</h2>
             <div className="picker-cards">
-              <div className="picker-card" onClick={() => setSpecialty('BH')}>
+              <button className="picker-card" onClick={() => setSpecialty('BH')}>
                 <div className="picker-card-icon">🧠</div>
                 <div className="picker-card-title">Behavioral Health</div>
                 <div className="picker-card-sub">ACT-1 · ACT-2 · CSP-1</div>
-              </div>
-              <div className="picker-card" onClick={() => setSpecialty('IM')}>
+              </button>
+              <button className="picker-card" onClick={() => setSpecialty('IM')}>
                 <div className="picker-card-icon">🏥</div>
                 <div className="picker-card-title">Internal Medicine</div>
                 <div className="picker-card-sub">IM-1</div>
-              </div>
+              </button>
             </div>
           </>
         ) : (
@@ -54,10 +54,10 @@ export default function ProviderPicker() {
             </h2>
             <div className="picker-provider-list">
               {providers.map(p => (
-                <div key={p.provider_id} className="picker-provider-card" onClick={() => setProvider(p)}>
+                <button key={p.provider_id} className="picker-provider-card" onClick={() => setProvider(p)}>
                   <div className="picker-provider-name">{p.name}</div>
                   <div className="picker-provider-sub">{p.team} · {p.provider_id}</div>
-                </div>
+                </button>
               ))}
             </div>
           </>
