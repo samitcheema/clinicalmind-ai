@@ -482,3 +482,36 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .picker-provider-card:hover { border-color: var(--primary); }
 .picker-provider-name { font-size: 14px; font-weight: 600; color: var(--text-1); }
 .picker-provider-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+/* ── IM Disease Panels ───────────────────────────────────────────────────── */
+.disease-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+.disease-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+.panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.panel-empty { font-size: 12px; color: var(--text-3); }
+.panel-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.panel-table tr { border-bottom: 1px solid var(--border); }
+.panel-table tr:last-child { border-bottom: none; }
+.panel-table td { padding: 5px 4px; }
+.panel-name  { color: var(--text-1); font-weight: 500; }
+.panel-metric { color: var(--text-2); font-variant-numeric: tabular-nums; }
+.panel-trend  { color: var(--text-3); width: 20px; text-align: center; }
+.panel-risk   { width: 64px; text-align: right; font-size: 10px; font-weight: 600; }
+.risk-high     { color: var(--red); }
+.risk-moderate { color: var(--amber); }
+.risk-low      { color: var(--green); }
