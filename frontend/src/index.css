@@ -515,3 +515,14 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .risk-high     { color: var(--red); }
 .risk-moderate { color: var(--amber); }
 .risk-low      { color: var(--green); }
+/* ── Topbar switch button ────────────────────────────────────────────────── */
+.topbar-switch-btn {
+  background: none;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  margin-left: 4px;
+  font-size: 11px;
+  font-family: inherit;
+  padding: 0;
+}

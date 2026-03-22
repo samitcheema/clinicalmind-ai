@@ -28,11 +28,8 @@ export default function Topbar({ status }) {
       <div className="topbar-right">
         {provider && (
           <div className="badge-pill">
-            👤 {provider.name}
-            <button
-              onClick={clearProvider}
-              style={{ background:'none', border:'none', color:'var(--text-3)', cursor:'pointer', marginLeft:'6px', fontSize:'11px' }}
-            >
+            👤 {provider.name} ·
+            <button className="topbar-switch-btn" onClick={clearProvider}>
               switch
             </button>
           </div>
