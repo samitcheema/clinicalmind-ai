@@ -37,8 +37,8 @@ function eGFRSlope(egfr_history) {
 function StatCard({ label, value, color }) {
   return (
     <div className="stat-card" style={{ borderLeftColor: `var(--${color})` }}>
-      <div className="stat-label">{label}</div>
-      <div className="stat-value" style={{ color: `var(--${color})` }}>{value}</div>
+      <div className="sc-label">{label}</div>
+      <div className="sc-value" style={{ color: `var(--${color})` }}>{value}</div>
     </div>
   );
 }
@@ -110,7 +110,7 @@ export default function IMDashboard() {
   return (
     <div className="dashboard-pane">
       <div className="dash-inner">
-        <div className="stats-row">
+        <div className="stat-grid">
           <StatCard label="High Risk"    value={data.highRisk.length}      color="red"     />
           <StatCard label="A1c > 8.0"   value={data.diabetics.length}     color="amber"   />
           <StatCard label="Care Gaps"   value={data.gaps.length}          color="primary" />

@@ -38,7 +38,7 @@ function computeStats(patients) {
   return { total, kpiStats, overdueTotal, overallPct, activeCrisis, alerts };
 }
 
-export default function Dashboard({ patients, loading }) {
+export default function BHDashboard({ patients, loading }) {
   const s = useMemo(() => computeStats(patients), [patients]);
 
   if (loading || !s) {

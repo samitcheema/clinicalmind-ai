@@ -15,6 +15,7 @@ body {
   --border:       #334155;
   --border-light: #1e293b; /* intentionally same as --surface; separate token for future divergence */
   --text:         #f8fafc;
+  --text-1:       #f8fafc;
   --text-2:       #cbd5e1;
   --text-3:       #94a3b8;
   --text-4:       #475569;
@@ -45,6 +46,7 @@ body {
   --border:       #d6d0c8;
   --border-light: #ece9e4;
   --text:         #1e1a16;
+  --text-1:       #1e1a16;
   --text-2:       #3d3530;
   --text-3:       #7a6f66;
   --text-4:       #a8a097;
