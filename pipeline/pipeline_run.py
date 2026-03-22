@@ -7,8 +7,6 @@ pipeline_runs Supabase table.
 """
 from __future__ import annotations
 
-
-
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -71,16 +69,3 @@ class PipelineRun:
         if self.completed_at:
             return (self.completed_at - self.started_at).total_seconds()
         return (_now() - self.started_at).total_seconds()
-
-    def stage(self, name: str) -> StageResult | None:
-        return next((s for s in self.stages if s.name == name), None)
-
-    def to_dict(self) -> dict:
-        return {
-            "run_id":        self.run_id,
-            "started_at":    self.started_at.isoformat(),
-            "completed_at":  self.completed_at.isoformat() if self.completed_at else None,
-            "status":        self.status,
-            "config":        self.config,
-            "stages":        [s.to_dict() for s in self.stages],
-        }

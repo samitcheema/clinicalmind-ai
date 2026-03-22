@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { KPI_NAMES, KPI_DISPLAY } from '../utils/dataTransform.js';
-import { offsetDate, TODAY, fmtDate } from '../utils/mockGenerators.js';
+import { offsetDate, TODAY } from '../utils/mockGenerators.js';
 import PatientTable from './PatientTable.jsx';
 
 const CARD_META = {

@@ -11,8 +11,6 @@ Output: list of canonical patient dicts + StageResult
 """
 from __future__ import annotations
 
-
-
 import os
 import sys
 import time

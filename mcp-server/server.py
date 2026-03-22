@@ -1,8 +1,8 @@
 """
 ClinicalMind AI — FastMCP Server
 
-Exposes behavioral health pipeline data as 7 discrete MCP tools,
-1 resource, and 3 reusable prompts.
+Exposes behavioral health and internal medicine pipeline data as MCP tools,
+resources, and reusable prompts.
 
 Transport: stdio  (compatible with Claude Desktop, Claude Code, and the
                    React chat UI via the MCP client library)
@@ -12,7 +12,7 @@ To switch to real SQL:
                              to 'adapter.sql_adapter'
   No tool definitions need to change.
 
-Tools:
+Tools (BH):
   get_patients               — patient list with optional filters
   get_patient_detail         — full record for one patient
   get_high_risk_patients     — patients flagged by PHQ-9, SSRS, or crisis
@@ -21,14 +21,21 @@ Tools:
   get_crisis_events          — crisis episodes within a date window
   get_disengaged_patients    — no contact beyond a configurable threshold
 
+Tools (IM):
+  get_im_patients            — IM patient panel with optional filters
+  get_im_patient_detail      — full IM record for one patient
+  get_chronic_disease_panel  — outliers by chronic disease condition
+  get_preventive_care_gaps   — patients overdue for preventive care items
+
 Resources:
-  clinicalmind://cohort-summary  — live cohort snapshot (risk breakdown,
-                                   KPI compliance, crisis count)
+  clinicalmind://cohort-summary     — BH cohort snapshot (risk, KPI, crisis)
+  clinicalmind://im-cohort-summary  — IM panel snapshot (risk, provider breakdown)
 
 Prompts:
-  daily-huddle       — high-risk patients + overdue assessments today
-  crisis-review      — crisis events in the last 7 days
-  disengagement-check — patients with no contact in 30+ days
+  daily-huddle        — high-risk BH patients + overdue assessments today
+  crisis-review       — BH crisis events in the last 7 days
+  disengagement-check — BH patients with no contact in 30+ days
+  im-panel-review     — IM panel review scoped to a specific provider
 """
 
 from typing import Annotated, Literal
@@ -61,6 +68,13 @@ else:
         get_crisis_events       as _get_crisis_events,
         get_disengaged_patients as _get_disengaged_patients,
     )
+
+from adapter.im_mock_adapter import (
+    get_im_patients            as _get_im_patients,
+    get_im_patient_detail      as _get_im_patient_detail,
+    get_chronic_disease_panel  as _get_chronic_disease_panel,
+    get_preventive_care_gaps   as _get_preventive_care_gaps,
+)
 
 mcp = FastMCP("clinicalmind-mcp")
 
@@ -199,6 +213,101 @@ def get_disengaged_patients(
     return _get_disengaged_patients(threshold_days=threshold_days or 30)
 
 
+# ── Tool 8: get_im_patients ───────────────────────────────────────────────────
+
+@mcp.tool()
+def get_im_patients(
+    risk_level: Annotated[
+        Literal["High", "Moderate", "Low"] | None,
+        "Filter by risk level: High, Moderate, or Low",
+    ] = None,
+    condition: Annotated[
+        Literal["diabetes", "ckd", "hypertension"] | None,
+        "Filter by chronic condition. Options: diabetes, ckd, hypertension",
+    ] = None,
+    provider: Annotated[
+        str | None,
+        "Filter by provider name (partial match) or provider ID",
+    ] = None,
+) -> dict:
+    """Returns Internal Medicine patient panel with summary chronic disease data.
+    Optionally filter by risk level, condition, or provider."""
+    result = _get_im_patients(risk_level=risk_level, condition=condition, provider=provider)
+    return {
+        "total":    len(result),
+        "filters":  {"risk_level": risk_level, "condition": condition, "provider": provider},
+        "patients": result,
+    }
+
+
+# ── Tool 9: get_im_patient_detail ─────────────────────────────────────────────
+
+@mcp.tool()
+def get_im_patient_detail(
+    patient_id: Annotated[
+        str,
+        "The IM patient ID (e.g. IM001). Use get_im_patients to look up IDs.",
+    ],
+) -> dict:
+    """Returns the complete IM record for one patient — all lab histories
+    (A1c, eGFR, BP, cholesterol), medications, and preventive care status.
+    Raw history arrays are included; use get_chronic_disease_panel for computed slopes."""
+    result = _get_im_patient_detail(patient_id)
+    if result is None:
+        return {"error": f"No IM patient found with ID: {patient_id}"}
+    return result
+
+
+# ── Tool 10: get_chronic_disease_panel ────────────────────────────────────────
+
+@mcp.tool()
+def get_chronic_disease_panel(
+    condition: Annotated[
+        Literal["diabetes", "ckd", "hypertension"],
+        (
+            'Chronic condition to surface outliers for. '
+            '"diabetes" = latest A1c > 8.0; '
+            '"ckd" = eGFR declining ≥ 3 units/year; '
+            '"hypertension" = latest systolic BP > 140.'
+        ),
+    ],
+) -> dict:
+    """Returns IM patients with poorly controlled chronic disease metrics,
+    ranked by risk level. Includes longitudinal history and computed trend slopes."""
+    result = _get_chronic_disease_panel(condition=condition)
+    return {
+        "condition":      condition,
+        "total_outliers": len(result),
+        "patients":       result,
+    }
+
+
+# ── Tool 11: get_preventive_care_gaps ─────────────────────────────────────────
+
+@mcp.tool()
+def get_preventive_care_gaps(
+    gap_type: Annotated[
+        Literal[
+            "flu_vaccine", "colonoscopy", "mammogram",
+            "eye_exam_diabetic", "microalbumin", "foot_exam_diabetic",
+        ] | None,
+        (
+            "Specific preventive care item to filter by. "
+            "Options: flu_vaccine, colonoscopy, mammogram, eye_exam_diabetic, "
+            "microalbumin, foot_exam_diabetic. Omit for all gaps."
+        ),
+    ] = None,
+) -> dict:
+    """Returns IM patients who are overdue for preventive care items.
+    Sorted by number of overdue items descending. Omit gap_type for all gaps."""
+    result = _get_preventive_care_gaps(gap_type=gap_type)
+    return {
+        "gap_type_filter":          gap_type or "all",
+        "total_patients_with_gaps": len(result),
+        "patients":                 result,
+    }
+
+
 # ── Resource: cohort-summary ──────────────────────────────────────────────────
 
 @mcp.resource("clinicalmind://cohort-summary")
@@ -223,6 +332,28 @@ def cohort_summary() -> str:
         f"Risk: {risk_counts['High']} High / {risk_counts['Moderate']} Moderate / {risk_counts['Low']} Low\n"
         f"KPI compliance: {kpi['overall_compliance_pct']}% overall (target {kpi['target_pct']}%, {kpi_status})\n"
         f"Crisis events (last 7 days): {crisis['total_events']} across {crisis['unique_patients']} patients"
+    )
+
+
+@mcp.resource("clinicalmind://im-cohort-summary")
+def im_cohort_summary() -> str:
+    """Live snapshot of the IM panel — risk breakdown and provider breakdown."""
+    patients = _get_im_patients()
+    total = len(patients)
+
+    risk_counts = {"High": 0, "Moderate": 0, "Low": 0}
+    provider_counts: dict[str, int] = {}
+    for p in patients:
+        risk_counts[p["risk_level"]] += 1
+        pname = p.get("provider_name", "Unknown")
+        provider_counts[pname] = provider_counts.get(pname, 0) + 1
+
+    provider_lines = ", ".join(f"{name}: {cnt}" for name, cnt in sorted(provider_counts.items()))
+
+    return (
+        f"IM panel snapshot — {total} patients total\n"
+        f"Risk: {risk_counts['High']} High / {risk_counts['Moderate']} Moderate / {risk_counts['Low']} Low\n"
+        f"By provider: {provider_lines}"
     )
 
 
@@ -261,6 +392,23 @@ def disengagement_check() -> str:
         "1. List all patients with no contact in the last 30 days, sorted by days since last contact.\n"
         "2. Flag which of these patients are high-risk (PHQ-9 ≥15 or SSRS High).\n"
         "3. Recommend a re-engagement priority order."
+    )
+
+
+@mcp.prompt()
+def im_panel_review(provider_id: str) -> str:
+    """IM panel review prompt scoped to a specific provider — surfaces high-risk
+    chronic disease patients and patients with outstanding preventive care gaps."""
+    return (
+        f"Run an IM panel review for provider {provider_id}:\n"
+        f"1. Call get_im_patients with provider='{provider_id}' and risk_level='High'. "
+        "List each patient with their key out-of-control metric (A1c value, eGFR slope, or BP reading).\n"
+        f"2. Call get_chronic_disease_panel with condition='diabetes'. "
+        "For each patient assigned to this provider, show their A1c trend direction.\n"
+        f"3. Call get_chronic_disease_panel with condition='ckd'. "
+        "For each patient assigned to this provider, show their eGFR slope in units/year.\n"
+        f"4. Call get_preventive_care_gaps. "
+        f"List all patients assigned to provider {provider_id} who are overdue, grouped by care type."
     )
 
 

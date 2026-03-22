@@ -38,12 +38,12 @@ def days_between(date_str: str) -> int:
 # ── Providers (output.su_staff) ───────────────────────────────────────────────
 
 PROVIDERS = [
-    {"provider_id": "PROV001", "name": "Dr. Emma Chen",       "team": "ACT-1"},
-    {"provider_id": "PROV002", "name": "Dr. Marcus Williams", "team": "ACT-1"},
-    {"provider_id": "PROV003", "name": "Dr. Priya Sharma",    "team": "ACT-2"},
-    {"provider_id": "PROV004", "name": "Dr. James O'Brien",   "team": "ACT-2"},
-    {"provider_id": "PROV005", "name": "Dr. Sarah Nakamura",  "team": "CSP-1"},
-    {"provider_id": "PROV006", "name": "Dr. Robert Kim",      "team": "CSP-1"},
+    {"provider_id": "PROV001", "name": "Dr. Emma Chen",       "team": "ACT-1", "specialty": "BH"},
+    {"provider_id": "PROV002", "name": "Dr. Marcus Williams", "team": "ACT-1", "specialty": "BH"},
+    {"provider_id": "PROV003", "name": "Dr. Priya Sharma",    "team": "ACT-2", "specialty": "BH"},
+    {"provider_id": "PROV004", "name": "Dr. James O'Brien",   "team": "ACT-2", "specialty": "BH"},
+    {"provider_id": "PROV005", "name": "Dr. Sarah Nakamura",  "team": "CSP-1", "specialty": "BH"},
+    {"provider_id": "PROV006", "name": "Dr. Robert Kim",      "team": "CSP-1", "specialty": "BH"},
 ]
 
 DIAGNOSES = [
