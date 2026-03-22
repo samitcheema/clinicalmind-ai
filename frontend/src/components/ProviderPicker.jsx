@@ -20,7 +20,7 @@ export default function ProviderPicker() {
   const { setProvider } = useProvider();
   const [specialty, setSpecialty] = useState(null);
 
-  const providers = specialty === 'BH' ? BH_PROVIDERS : IM_PROVIDERS;
+  const providers = specialty === 'IM' ? IM_PROVIDERS : BH_PROVIDERS;
 
   return (
     <div className="provider-picker-overlay">
