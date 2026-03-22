@@ -327,20 +327,23 @@ def cohort_summary() -> str:
 
 @mcp.resource("clinicalmind://im-cohort-summary")
 def im_cohort_summary() -> str:
-    """Live snapshot of the IM panel — risk breakdown and preventive care gap count."""
+    """Live snapshot of the IM panel — risk breakdown and provider breakdown."""
     patients = _get_im_patients()
     total = len(patients)
 
     risk_counts = {"High": 0, "Moderate": 0, "Low": 0}
+    provider_counts: dict[str, int] = {}
     for p in patients:
         risk_counts[p["risk_level"]] = risk_counts.get(p["risk_level"], 0) + 1
+        pname = p.get("provider_name", "Unknown")
+        provider_counts[pname] = provider_counts.get(pname, 0) + 1
 
-    gaps = _get_preventive_care_gaps()
+    provider_lines = ", ".join(f"{name}: {cnt}" for name, cnt in sorted(provider_counts.items()))
 
     return (
         f"IM panel snapshot — {total} patients total\n"
         f"Risk: {risk_counts['High']} High / {risk_counts['Moderate']} Moderate / {risk_counts['Low']} Low\n"
-        f"Patients with preventive care gaps: {len(gaps)}"
+        f"By provider: {provider_lines}"
     )
 
 
@@ -383,11 +386,11 @@ def disengagement_check() -> str:
 
 
 @mcp.prompt()
-def im_panel_review() -> str:
-    """IM panel review prompt — surfaces high-risk chronic disease patients
-    and patients with outstanding preventive care gaps."""
+def im_panel_review(provider_id: str) -> str:
+    """IM panel review prompt scoped to a specific provider — surfaces high-risk
+    chronic disease patients and patients with outstanding preventive care gaps."""
     return (
-        "Run an IM panel review:\n"
+        f"Run an IM panel review for provider {provider_id}:\n"
         "1. Who are my high-risk IM patients? List each with their key out-of-control metric "
         "(A1c value, eGFR slope, or BP reading).\n"
         "2. Which patients have poorly controlled diabetes (A1c > 8)? Show their A1c trend direction.\n"
