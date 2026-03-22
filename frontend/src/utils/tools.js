@@ -94,7 +94,7 @@ export function runTool(name, input, patients) {
     case 'get_im_patients':
       return getImPatients(input);
     case 'get_im_patient_detail':
-      return getImPatientDetail(input.patient_id) ?? { error: `No IM patient found: ${input.patient_id}` };
+      return getImPatientDetail(input.patient_id) ?? { error: `Patient ${input.patient_id} not found` };
     case 'get_chronic_disease_panel':
       return { condition: input.condition, patients: getChronicDiseasePanel(input.condition) };
     case 'get_preventive_care_gaps':

@@ -24,6 +24,10 @@ const TOOL_LABELS = {
   get_overdue_assessments: i  => i.assessment_type ? `Overdue: ${i.assessment_type.toUpperCase()}` : 'Finding overdue assessments',
   get_crisis_events:       i  => `Crisis events (${i.window_days||28}d window)`,
   get_disengaged_patients: i  => `Disengaged >${i.threshold_days||30} days`,
+  get_im_patients:         i  => i.risk_level || i.condition ? `IM patients: ${i.risk_level||i.condition}` : 'Querying IM patients',
+  get_im_patient_detail:   i  => `Getting IM details: ${i.patient_id}`,
+  get_chronic_disease_panel: i => `Disease panel: ${i.condition}`,
+  get_preventive_care_gaps:  i => i.gap_type ? `Care gaps: ${i.gap_type}` : 'Checking care gaps',
 };
 
 const ALL_TOOL_DEFS = [...TOOL_DEFS, ...IM_TOOL_DEFS];
