@@ -14,7 +14,10 @@ export default function PatientTable({ patients }) {
   const [expanded, setExpanded] = useState(new Set());
 
   // For IM providers, source data from imMockData instead of the BH patients prop
-  const activePatients = isIM ? getImPatients() : patients;
+  const activePatients = useMemo(
+    () => (isIM ? getImPatients() : patients),
+    [isIM, patients]
+  );
 
   function toggleExpand(id) {
     setExpanded(prev => {
@@ -83,7 +86,7 @@ export default function PatientTable({ patients }) {
               <th style={{width:32}} className="no-sort"></th>
               <SortTh col="name">Patient</SortTh>
               {isIM
-                ? <><th>Conditions</th><th>Risk</th></>
+                ? <><th>Conditions</th><th>Risk Level</th></>
                 : <><th>Diagnosis</th><SortTh col="overdue">KPI Status</SortTh><SortTh col="contact">Last Contact</SortTh></>
               }
               <th>Provider</th>
