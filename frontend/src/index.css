@@ -436,3 +436,47 @@ tbody td { padding: 10px 12px; vertical-align: middle; }
 .kpi-bar-fill { height:100%; border-radius:4px; transition:width .5s ease; }
 .panel-avg { margin-top:14px; padding-top:12px; border-top:1px solid var(--border); font-size:11px; color:var(--text-3); }
 .panel-avg strong { color:var(--text); font-weight:700; }
+
+/* ── Provider Picker ─────────────────────────────────────────────────────── */
+.provider-picker-overlay {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.provider-picker {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 40px;
+  width: 480px;
+  max-width: 95vw;
+}
+.picker-logo { text-align: center; margin-bottom: 28px; }
+.picker-heading {
+  font-size: 15px; font-weight: 600; color: var(--text-1);
+  margin: 0 0 16px; display: flex; align-items: center; gap: 10px;
+}
+.picker-back {
+  background: none; border: none; color: var(--text-3);
+  cursor: pointer; font-size: 13px; padding: 0;
+}
+.picker-cards { display: flex; gap: 12px; }
+.picker-card {
+  flex: 1; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 20px; cursor: pointer; text-align: center;
+  transition: border-color 0.15s;
+}
+.picker-card:hover { border-color: var(--primary); }
+.picker-card-icon { font-size: 28px; margin-bottom: 8px; }
+.picker-card-title { font-size: 14px; font-weight: 600; color: var(--text-1); }
+.picker-card-sub { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.picker-provider-list { display: flex; flex-direction: column; gap: 8px; }
+.picker-provider-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 16px; cursor: pointer;
+  transition: border-color 0.15s;
+}
+.picker-provider-card:hover { border-color: var(--primary); }
+.picker-provider-name { font-size: 14px; font-weight: 600; color: var(--text-1); }
+.picker-provider-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
