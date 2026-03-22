@@ -59,7 +59,7 @@ describe('getChronicDiseasePanel', () => {
 
   it('ckd returns patients with eGFR slope <= -3/yr', () => {
     const result = getChronicDiseasePanel('ckd');
-    expect(result.length).toBeGreaterThan(0);
+    expect(result.length).toBe(7);
   });
 
   it('hypertension returns patients with latest systolic > 140', () => {

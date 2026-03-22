@@ -490,10 +490,10 @@ const IM_PATIENTS = [
  */
 function eGFRSlope(egfr_history) {
   if (!egfr_history || egfr_history.length < 2) return null;
-  const pts = egfr_history.map(e => ({
-    t: new Date(e.date).getFullYear() + new Date(e.date).getMonth() / 12,
-    v: e.value,
-  }));
+  const pts = egfr_history.map(e => {
+    const d = new Date(e.date);
+    return { t: d.getUTCFullYear() + d.getUTCMonth() / 12, v: e.value };
+  });
   const n = pts.length;
   const sumT  = pts.reduce((s, p) => s + p.t, 0);
   const sumV  = pts.reduce((s, p) => s + p.v, 0);
@@ -528,6 +528,8 @@ export function getChronicDiseasePanel(condition) {
         return latest != null && latest > 8.0;
       });
     case 'ckd':
+      // Filters on eGFR trajectory, not CKD diagnosis — surfaces patients at risk
+      // of renal decline regardless of current condition list.
       return IM_PATIENTS.filter(p => {
         const slope = eGFRSlope(p.egfr_history);
         return slope != null && slope <= -3;
