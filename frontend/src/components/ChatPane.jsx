@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { TOOL_DEFS, runTool } from '../utils/tools.js';
+import { TOOL_DEFS, IM_TOOL_DEFS, runTool } from '../utils/tools.js';
 import { PROXY } from '../utils/dataTransform.js';
 import { TODAY } from '../utils/mockGenerators.js';
 
@@ -25,6 +25,8 @@ const TOOL_LABELS = {
   get_crisis_events:       i  => `Crisis events (${i.window_days||28}d window)`,
   get_disengaged_patients: i  => `Disengaged >${i.threshold_days||30} days`,
 };
+
+const ALL_TOOL_DEFS = [...TOOL_DEFS, ...IM_TOOL_DEFS];
 
 const SUGGESTIONS = [
   "Who are my highest-risk patients?",
@@ -70,7 +72,7 @@ export default function ChatPane({ patients, apiKey, onNeedKey }) {
     const res = await fetch(PROXY, {
       method:'POST',
       headers:{'content-type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-allow-browser':'true'},
-      body:JSON.stringify({ model:MODEL, max_tokens:1024, system:SYSTEM, tools:TOOL_DEFS, messages:msgs })
+      body:JSON.stringify({ model:MODEL, max_tokens:1024, system:SYSTEM, tools:ALL_TOOL_DEFS, messages:msgs })
     });
     if (!res.ok) { const err=await res.json().catch(()=>({})); throw new Error(err?.error?.message||`HTTP ${res.status}`); }
     return res.json();

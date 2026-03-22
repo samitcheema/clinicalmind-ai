@@ -1,5 +1,11 @@
 import { KPI_NAMES } from './dataTransform.js';
 import { TODAY, offsetDate } from './mockGenerators.js';
+import {
+  getImPatients,
+  getImPatientDetail,
+  getChronicDiseasePanel,
+  getPreventiveCareGaps,
+} from './imMockData.js';
 
 export function daysBetween(dateStr) {
   if (!dateStr) return 999;
@@ -85,6 +91,14 @@ export function runTool(name, input, patients) {
     case 'get_overdue_assessments': return getOverdueAssessments(patients, input);
     case 'get_crisis_events':       return getCrisisEvents(patients, input);
     case 'get_disengaged_patients': return getDisengagedPatients(patients, input);
+    case 'get_im_patients':
+      return getImPatients(input);
+    case 'get_im_patient_detail':
+      return getImPatientDetail(input.patient_id) ?? { error: `No IM patient found: ${input.patient_id}` };
+    case 'get_chronic_disease_panel':
+      return { condition: input.condition, patients: getChronicDiseasePanel(input.condition) };
+    case 'get_preventive_care_gaps':
+      return { patients: getPreventiveCareGaps(input.gap_type ?? null) };
     default: return { error:`Unknown tool: ${name}` };
   }
 }
@@ -98,4 +112,50 @@ export const TOOL_DEFS = [
   { name:'get_overdue_assessments', description:'Returns patients with overdue assessments.', input_schema:{type:'object',properties:{assessment_type:{type:'string',enum:['bha','sra','aims','whodas','phq9','beh_tp','beh_csp']}}}},
   { name:'get_crisis_events', description:'Returns crisis episodes within a lookback window. Default: 28 days.', input_schema:{type:'object',properties:{window_days:{type:'integer'}}}},
   { name:'get_disengaged_patients', description:'Returns patients with no contact beyond threshold. Default: 30 days.', input_schema:{type:'object',properties:{threshold_days:{type:'integer'}}}},
+];
+
+export const IM_TOOL_DEFS = [
+  {
+    name: 'get_im_patients',
+    description: 'Returns the IM patient panel with chronic disease summary data. Filter by risk level, condition, or provider.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        risk_level: { type: 'string', enum: ['High', 'Moderate', 'Low'] },
+        condition:  { type: 'string', enum: ['diabetes', 'ckd', 'hypertension'] },
+        provider:   { type: 'string', description: 'Provider ID (e.g. PROV007) or name fragment' },
+      },
+    },
+  },
+  {
+    name: 'get_im_patient_detail',
+    description: 'Returns the full IM record for one patient — lab histories, medications, and preventive care status.',
+    input_schema: {
+      type: 'object',
+      properties: { patient_id: { type: 'string' } },
+      required: ['patient_id'],
+    },
+  },
+  {
+    name: 'get_chronic_disease_panel',
+    description: 'Returns IM patients with poorly controlled chronic disease metrics. diabetes = A1c > 8.0; ckd = eGFR slope ≤ −3/yr; hypertension = systolic BP > 140.',
+    input_schema: {
+      type: 'object',
+      properties: { condition: { type: 'string', enum: ['diabetes', 'ckd', 'hypertension'] } },
+      required: ['condition'],
+    },
+  },
+  {
+    name: 'get_preventive_care_gaps',
+    description: 'Returns IM patients overdue for preventive care. Options: flu_vaccine, colonoscopy, mammogram, eye_exam_diabetic, microalbumin, foot_exam_diabetic.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        gap_type: {
+          type: 'string',
+          enum: ['flu_vaccine', 'colonoscopy', 'mammogram', 'eye_exam_diabetic', 'microalbumin', 'foot_exam_diabetic'],
+        },
+      },
+    },
+  },
 ];
