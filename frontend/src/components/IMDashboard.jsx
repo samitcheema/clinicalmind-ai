@@ -16,7 +16,8 @@ function trendArrow(history, valueKey = 'value') {
   return '→';
 }
 
-// Annualized eGFR slope (UTC date methods — ISO date strings parse as midnight UTC)
+// Annualized eGFR slope — intentionally local to keep display separate from data module.
+// Rounds to one decimal for display; imMockData.js keeps the raw value for filtering.
 function eGFRSlope(egfr_history) {
   if (!egfr_history || egfr_history.length < 2) return null;
   const pts = egfr_history.map(e => {
