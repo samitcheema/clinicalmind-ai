@@ -1,13 +1,20 @@
+// frontend/src/components/Sidebar.jsx
+import { NavLink } from 'react-router-dom';
 import { KPI_NAMES } from '../utils/dataTransform';
+import { useProvider } from '../ProviderContext';
 
-export default function Sidebar({ activeView, onNavigate, onNeedKey, apiKey, patients }) {
-  const overdueBadge = patients
-    ? patients.filter(p => KPI_NAMES.some(k => p.kpis[k].overdue)).length
+export default function Sidebar({ onNeedKey, apiKey, patients }) {
+  const { provider } = useProvider();
+
+  const overdueBadge = provider?.specialty === 'BH' && patients?.length
+    ? patients.filter(p => KPI_NAMES.some(k => p.kpis?.[k]?.overdue)).length
     : 0;
 
-  function handleChat() {
-    if (!apiKey) { onNeedKey(); } else { onNavigate('chat'); }
+  function handleChat(e) {
+    if (!apiKey) { e.preventDefault(); onNeedKey(); }
   }
+
+  const navCls = ({ isActive }) => `nav-item${isActive ? ' active' : ''}`;
 
   return (
     <aside className="sidebar">
@@ -40,38 +47,23 @@ export default function Sidebar({ activeView, onNavigate, onNeedKey, apiKey, pat
 
       <nav className="sidebar-nav">
         <span className="nav-section-label">MAIN</span>
-        <div
-          className={`nav-item${activeView === 'dashboard' ? ' active' : ''}`}
-          onClick={() => onNavigate('dashboard')}
-        >
+        <NavLink to="/dashboard" className={navCls}>
           <div className="nav-dot" />
           Dashboard
-        </div>
-        <div
-          className={`nav-item${activeView === 'patients' ? ' active' : ''}`}
-          onClick={() => onNavigate('patients')}
-        >
+        </NavLink>
+        <NavLink to="/patients" className={navCls}>
           <div className="nav-dot" />
           Patients
           {overdueBadge > 0 && <span className="nav-badge">{overdueBadge}</span>}
-        </div>
-        <div
-          className={`nav-item${activeView === 'chat' ? ' active' : ''}`}
-          onClick={handleChat}
-        >
+        </NavLink>
+        <NavLink to="/chat" className={navCls} onClick={handleChat}>
           <div className="nav-dot" />
           AI Assistant
-        </div>
+        </NavLink>
 
         <span className="nav-section-label">REPORTS</span>
-        <div className="nav-item disabled">
-          <div className="nav-dot" />
-          KPI Summary
-        </div>
-        <div className="nav-item disabled">
-          <div className="nav-dot" />
-          Crisis Log
-        </div>
+        <div className="nav-item disabled"><div className="nav-dot" />KPI Summary</div>
+        <div className="nav-item disabled"><div className="nav-dot" />Crisis Log</div>
       </nav>
 
       <div className="sidebar-footer">
