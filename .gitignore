@@ -31,3 +31,8 @@ pipeline/fhir_synthea.json
 
 # Misc
 *.pdf
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
