@@ -323,52 +323,23 @@ CREATE INDEX IF NOT EXISTS IX_encounter_encounter ON src.encounter (encounter_id
 
 -- ── src.person ────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS src.person (
-    DurableKey                    BIGINT,
-    StartDate                     DATE,
-    DeathDate                     DATE,
-    GenderIdentity                VARCHAR(156),
-    Sex                           VARCHAR(156),
-    SexAssignedAtBirth            VARCHAR(156),
-    Ethnicity                     VARCHAR(300),
-    PrimaryCareProviderDurableKey BIGINT,
-    FirstName                     VARCHAR(200),
-    LastName                      VARCHAR(300),
-    BirthDate                     DATE,
-    PrimaryMRN                    VARCHAR(150),
-    PostalCode                    VARCHAR(100),
-    FirstRace                     VARCHAR(255),
-    MaritalStatus                 VARCHAR(300)
+    person_id                  BIGINT,
+    start_date                 DATE,
+    death_date                 DATE,
+    gender_identity            VARCHAR(156),
+    sex                        VARCHAR(156),
+    sex_assigned_at_birth      VARCHAR(156),
+    ethnicity                  VARCHAR(300),
+    primary_care_provider_id   BIGINT,
+    first_name                 VARCHAR(200),
+    last_name                  VARCHAR(300),
+    birth_date                 DATE,
+    primary_mrn                VARCHAR(150),
+    postal_code                VARCHAR(100),
+    first_race                 VARCHAR(255),
+    marital_status             VARCHAR(300)
 );
-CREATE INDEX IF NOT EXISTS IX_person_durablekey ON src.person ("DurableKey");
-
-
--- ── src.allergies ─────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.allergies (
-    su_id             BIGINT NOT NULL,
-    allergy_id        BIGINT NOT NULL,
-    allergy_name      VARCHAR(255),
-    "StartDateKey"    BIGINT,
-    "StartDate"       DATE,
-    "EndDateKey"      BIGINT,
-    "EndDate"         DATE,
-    "Severity"        VARCHAR(50),
-    "Status"          VARCHAR(50),
-    allergy_type      VARCHAR(100),
-    unknown_allergies BOOLEAN
-);
-CREATE INDEX IF NOT EXISTS IX_allergies_su_id_allergy_id ON src.allergies (su_id, allergy_id);
-
-
--- ── src.assessment ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.assessment (
-    "EncounterKey"      BIGINT,
-    "PatientDurableKey" BIGINT,
-    "DurableKey"        BIGINT,
-    "FTDName"           VARCHAR(200),
-    "DateValue"         DATE,
-    "FRDName"           VARCHAR(300),
-    "Value"             VARCHAR(2500)
-);
+CREATE INDEX IF NOT EXISTS IX_person_person_id ON src.person (person_id);
 
 
 -- ── src.dla20 ─────────────────────────────────────────────────
@@ -425,6 +396,7 @@ CREATE TABLE IF NOT EXISTS src.gad7 (
     encounter_id                 BIGINT,
     employee_id                  BIGINT,
     assessment_date              TIMESTAMPTZ,
+    accepted_flg                 SMALLINT,
     feeling_nervous              NUMERIC(3,2),
     restless                     NUMERIC(3,2),
     worry_about_different_things NUMERIC(3,2),
@@ -433,18 +405,6 @@ CREATE TABLE IF NOT EXISTS src.gad7 (
     feeling_afraid               NUMERIC(3,2),
     constant_worry               NUMERIC(3,2),
     total_score                  NUMERIC(4,2)
-);
-
-
--- ── src.pain_assessment ───────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.pain_assessment (
-    su_id             BIGINT,
-    encounter_id      BIGINT,
-    staff_id          BIGINT,
-    assessment_date   TIMESTAMPTZ,
-    accepted_flg      SMALLINT,
-    pain_score        NUMERIC(4,2),
-    pain_source_value VARCHAR(255)
 );
 
 
@@ -552,26 +512,18 @@ CREATE TABLE IF NOT EXISTS src.diagnosis (
 
 -- ── src.drug ──────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS src.drug (
-    su_id      BIGINT,
+    person_id  BIGINT,
     drug_id    BIGINT,
-    name       VARCHAR(255),
+    drug_name  VARCHAR(255),
     start_date DATE,
     end_date   DATE
-);
-
-
--- ── src.drug_procedure_mapping ────────────────────────────────
-CREATE TABLE IF NOT EXISTS src.drug_procedure_mapping (
-    drug_id               BIGINT,
-    procedure_code        VARCHAR(255),
-    procedure_description VARCHAR(500)
 );
 
 
 -- ── src.inpatient ─────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS src.inpatient (
     encounter_id   BIGINT,
-    patient_id     BIGINT,
+    person_id      BIGINT,
     ward           VARCHAR(300),
     ward_specialty VARCHAR(300),
     out_of_area    BOOLEAN,
@@ -582,9 +534,9 @@ CREATE TABLE IF NOT EXISTS src.inpatient (
 
 -- ── src.prescriptions ─────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS src.prescriptions (
-    su_id                     BIGINT,
+    person_id                 BIGINT,
     drug_id                   BIGINT,
-    name                      VARCHAR(255),
+    drug_name                 VARCHAR(255),
     days_supply               NUMERIC(18,2),
     refills_remaining         SMALLINT,
     dosage                    TEXT,
@@ -635,16 +587,6 @@ CREATE TABLE IF NOT EXISTS src.substance_use (
 -- (Populated via ensure_schema.py insert-if-empty guard)
 
 
--- ── src.ZipCodeList ───────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS src."ZipCodeList" (
-    "ZipCode" VARCHAR(5)   NOT NULL,
-    "City"    VARCHAR(100) NOT NULL,
-    "County"  VARCHAR(100) NOT NULL,
-    "State"   CHAR(2)      NOT NULL
-);
--- (Populated via ensure_schema.py insert-if-empty guard)
-
-
 -- ── src.treatment_plan ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS src.treatment_plan (
     bh_treatment_plan_id     BIGINT,
@@ -665,12 +607,10 @@ DECLARE t TEXT;
 BEGIN
     FOREACH t IN ARRAY ARRAY[
         'src.departments_of_interest','src.departments','src.encounter',
-        'src.person','src.allergies','src.assessment','src.dla20',
-        'src.cssrs','src.gad7','src.pain_assessment','src.phq9',
+        'src.person','src.dla20','src.cssrs','src.gad7','src.phq9',
         'src.safety_plan_mapping','src.crisis_safety_plan','src.diagnosis',
-        'src.drug','src.drug_procedure_mapping','src.inpatient','src.prescriptions',
-        'src.procedures','src.providers','src.substance_use',
-        'src.treatment_plan'
+        'src.drug','src.inpatient','src.prescriptions',
+        'src.procedures','src.providers','src.substance_use','src.treatment_plan'
     ] LOOP
         EXECUTE format('ALTER TABLE %s ENABLE ROW LEVEL SECURITY', t);
         BEGIN
@@ -681,10 +621,4 @@ BEGIN
         EXCEPTION WHEN duplicate_object THEN NULL;
         END;
     END LOOP;
-    -- ZipCodeList separately (quoted identifier)
-    EXECUTE 'ALTER TABLE src."ZipCodeList" ENABLE ROW LEVEL SECURITY';
-    BEGIN
-        EXECUTE 'CREATE POLICY "service_role_all" ON src."ZipCodeList" FOR ALL TO service_role USING (true) WITH CHECK (true)';
-    EXCEPTION WHEN duplicate_object THEN NULL;
-    END;
 END $$;

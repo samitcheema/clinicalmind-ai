@@ -402,9 +402,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_departments ───────────────────────────────────────────────────
+    # ── departments ─────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_departments (
+    CREATE TABLE IF NOT EXISTS src.departments (
         department_key       BIGINT,
         department_name      VARCHAR(255),
         location_name        VARCHAR(255),
@@ -417,9 +417,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_encounter ─────────────────────────────────────────────────────
+    # ── encounter ───────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_encounter (
+    CREATE TABLE IF NOT EXISTS src.encounter (
         person_id                BIGINT,
         provider_id              BIGINT,
         encounter_id             BIGINT,
@@ -462,65 +462,34 @@ _SRC_DDL: list[str] = [
         is_crisis_intervention    BOOLEAN
     )
     """,
-    "CREATE INDEX IF NOT EXISTS IX_grady_encounter_person    ON src.grady_encounter (person_id)",
-    "CREATE INDEX IF NOT EXISTS IX_grady_encounter_encounter ON src.grady_encounter (encounter_id)",
+    "CREATE INDEX IF NOT EXISTS IX_encounter_person    ON src.encounter (person_id)",
+    "CREATE INDEX IF NOT EXISTS IX_encounter_encounter ON src.encounter (encounter_id)",
 
-    # ── grady_person ────────────────────────────────────────────────────────
+    # ── person ──────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_person (
-        DurableKey                    BIGINT,
-        StartDate                     DATE,
-        DeathDate                     DATE,
-        GenderIdentity                VARCHAR(156),
-        Sex                           VARCHAR(156),
-        SexAssignedAtBirth            VARCHAR(156),
-        Ethnicity                     VARCHAR(300),
-        PrimaryCareProviderDurableKey BIGINT,
-        FirstName                     VARCHAR(200),
-        LastName                      VARCHAR(300),
-        BirthDate                     DATE,
-        PrimaryMRN                    VARCHAR(150),
-        PostalCode                    VARCHAR(100),
-        FirstRace                     VARCHAR(255),
-        MaritalStatus                 VARCHAR(300)
+    CREATE TABLE IF NOT EXISTS src.person (
+        person_id                  BIGINT,
+        start_date                 DATE,
+        death_date                 DATE,
+        gender_identity            VARCHAR(156),
+        sex                        VARCHAR(156),
+        sex_assigned_at_birth      VARCHAR(156),
+        ethnicity                  VARCHAR(300),
+        primary_care_provider_id   BIGINT,
+        first_name                 VARCHAR(200),
+        last_name                  VARCHAR(300),
+        birth_date                 DATE,
+        primary_mrn                VARCHAR(150),
+        postal_code                VARCHAR(100),
+        first_race                 VARCHAR(255),
+        marital_status             VARCHAR(300)
     )
     """,
-    "CREATE INDEX IF NOT EXISTS IX_grady_person_durablekey ON src.grady_person (DurableKey)",
+    "CREATE INDEX IF NOT EXISTS IX_person_person_id ON src.person (person_id)",
 
-    # ── allergies ───────────────────────────────────────────────────────────
+    # ── dla20 ───────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.allergies (
-        su_id             BIGINT NOT NULL,
-        allergy_id        BIGINT NOT NULL,
-        allergy_name      VARCHAR(255),
-        StartDateKey      BIGINT,
-        StartDate         DATE,
-        EndDateKey        BIGINT,
-        EndDate           DATE,
-        Severity          VARCHAR(50),
-        Status            VARCHAR(50),
-        allergy_type      VARCHAR(100),
-        unknown_allergies BOOLEAN
-    )
-    """,
-    "CREATE INDEX IF NOT EXISTS IX_allergies_su_id_allergy_id ON src.allergies (su_id, allergy_id)",
-
-    # ── grady_assessment ────────────────────────────────────────────────────
-    """
-    CREATE TABLE IF NOT EXISTS src.grady_assessment (
-        EncounterKey      BIGINT,
-        PatientDurableKey BIGINT,
-        DurableKey        BIGINT,
-        FTDName           VARCHAR(200),
-        DateValue         DATE,
-        FRDName           VARCHAR(300),
-        Value             VARCHAR(2500)
-    )
-    """,
-
-    # ── grady_dla20 ─────────────────────────────────────────────────────────
-    """
-    CREATE TABLE IF NOT EXISTS src.grady_dla20 (
+    CREATE TABLE IF NOT EXISTS src.dla20 (
         person_id            BIGINT,
         encounter_id         BIGINT,
         employee_id          BIGINT,
@@ -551,9 +520,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_cssrs ─────────────────────────────────────────────────────────
+    # ── cssrs ────────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_cssrs (
+    CREATE TABLE IF NOT EXISTS src.cssrs (
         person_id               BIGINT,
         encounter_id            BIGINT,
         employee_id             BIGINT,
@@ -568,13 +537,14 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_gad7 ──────────────────────────────────────────────────────────
+    # ── gad7 ─────────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_gad7 (
+    CREATE TABLE IF NOT EXISTS src.gad7 (
         person_id                    BIGINT,
         encounter_id                 BIGINT,
         employee_id                  BIGINT,
         assessment_date              TIMESTAMPTZ,
+        accepted_flg                 SMALLINT,
         feeling_nervous              NUMERIC(3,2),
         restless                     NUMERIC(3,2),
         worry_about_different_things NUMERIC(3,2),
@@ -586,22 +556,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_pain_assessment ───────────────────────────────────────────────
+    # ── phq9 ─────────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_pain_assessment (
-        su_id             BIGINT,
-        encounter_id      BIGINT,
-        staff_id          BIGINT,
-        assessment_date   TIMESTAMPTZ,
-        accepted_flg      SMALLINT,
-        pain_score        NUMERIC(4,2),
-        pain_source_value VARCHAR(255)
-    )
-    """,
-
-    # ── grady_phq9 ──────────────────────────────────────────────────────────
-    """
-    CREATE TABLE IF NOT EXISTS src.grady_phq9 (
+    CREATE TABLE IF NOT EXISTS src.phq9 (
         person_id             BIGINT,
         encounter_id          BIGINT,
         employee_id           BIGINT,
@@ -621,9 +578,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_safety_plan_mapping ───────────────────────────────────────────
+    # ── safety_plan_mapping ──────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_safety_plan_mapping (
+    CREATE TABLE IF NOT EXISTS src.safety_plan_mapping (
         field_id      VARCHAR(50)  NOT NULL PRIMARY KEY,
         plan_name     VARCHAR(300) NOT NULL,
         step_number   SMALLINT     NOT NULL,
@@ -635,9 +592,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_crisis_safety_plan ────────────────────────────────────────────
+    # ── crisis_safety_plan ───────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_crisis_safety_plan (
+    CREATE TABLE IF NOT EXISTS src.crisis_safety_plan (
         person_id                  BIGINT,
         attribute_id               BIGINT,
         smart_data_element_epic_id VARCHAR(50),
@@ -652,9 +609,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_diagnosis ─────────────────────────────────────────────────────
+    # ── diagnosis ────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_diagnosis (
+    CREATE TABLE IF NOT EXISTS src.diagnosis (
         person_id           BIGINT,
         diagnosis_key       BIGINT,
         encounter_id        BIGINT,
@@ -668,23 +625,14 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_drug ──────────────────────────────────────────────────────────
+    # ── drug ─────────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_drug (
-        su_id      BIGINT,
+    CREATE TABLE IF NOT EXISTS src.drug (
+        person_id  BIGINT,
         drug_id    BIGINT,
-        name       VARCHAR(255),
+        drug_name  VARCHAR(255),
         start_date DATE,
         end_date   DATE
-    )
-    """,
-
-    # ── drug_procedure_mapping ──────────────────────────────────────────────
-    """
-    CREATE TABLE IF NOT EXISTS src.drug_procedure_mapping (
-        drug_id               BIGINT,
-        procedure_code        VARCHAR(255),
-        procedure_description VARCHAR(500)
     )
     """,
 
@@ -692,7 +640,7 @@ _SRC_DDL: list[str] = [
     """
     CREATE TABLE IF NOT EXISTS src.inpatient (
         encounter_id   BIGINT,
-        patient_id     BIGINT,
+        person_id      BIGINT,
         ward           VARCHAR(300),
         ward_specialty VARCHAR(300),
         out_of_area    BOOLEAN,
@@ -704,9 +652,9 @@ _SRC_DDL: list[str] = [
     # ── prescriptions ───────────────────────────────────────────────────────
     """
     CREATE TABLE IF NOT EXISTS src.prescriptions (
-        su_id                     BIGINT,
+        person_id                 BIGINT,
         drug_id                   BIGINT,
-        name                      VARCHAR(255),
+        drug_name                 VARCHAR(255),
         days_supply               NUMERIC(18,2),
         refills_remaining         SMALLINT,
         dosage                    TEXT,
@@ -719,9 +667,9 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_procedures ────────────────────────────────────────────────────
+    # ── procedures ──────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_procedures (
+    CREATE TABLE IF NOT EXISTS src.procedures (
         person_id                  BIGINT,
         encounter_id               BIGINT,
         procedure_durable_key      BIGINT,
@@ -734,11 +682,11 @@ _SRC_DDL: list[str] = [
         event_end_date             DATE
     )
     """,
-    "CREATE INDEX IF NOT EXISTS IX_grady_procedures ON src.grady_procedures (procedure_durable_key)",
+    "CREATE INDEX IF NOT EXISTS IX_procedures ON src.procedures (procedure_durable_key)",
 
-    # ── grady_providers ─────────────────────────────────────────────────────
+    # ── providers ────────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_providers (
+    CREATE TABLE IF NOT EXISTS src.providers (
         provider_id              BIGINT,
         provider_npi             VARCHAR(50),
         provider_type            VARCHAR(100),
@@ -750,27 +698,17 @@ _SRC_DDL: list[str] = [
     )
     """,
 
-    # ── grady_substanceuse ──────────────────────────────────────────────────
+    # ── substance_use ────────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src.grady_substanceuse (
+    CREATE TABLE IF NOT EXISTS src.substance_use (
         icd_concept_name VARCHAR(255),
         icd_code         VARCHAR(20)
     )
     """,
 
-    # ── ZipCodeList ─────────────────────────────────────────────────────────
+    # ── treatment_plan ───────────────────────────────────────────────────────
     """
-    CREATE TABLE IF NOT EXISTS src."ZipCodeList" (
-        "ZipCode" VARCHAR(5)   NOT NULL,
-        "City"    VARCHAR(100) NOT NULL,
-        "County"  VARCHAR(100) NOT NULL,
-        "State"   CHAR(2)      NOT NULL
-    )
-    """,
-
-    # ── grady_treatment_plan ────────────────────────────────────────────────
-    """
-    CREATE TABLE IF NOT EXISTS src.grady_treatment_plan (
+    CREATE TABLE IF NOT EXISTS src.treatment_plan (
         bh_treatment_plan_id     BIGINT,
         plan_of_care_id          BIGINT,
         encounter_id             BIGINT,
@@ -814,9 +752,9 @@ _SRC_REFERENCE_DATA: list[str] = [
     ON CONFLICT DO NOTHING
     """,
 
-    # grady_safety_plan_mapping (PK on field_id → ON CONFLICT DO NOTHING)
+    # safety_plan_mapping (PK on field_id → ON CONFLICT DO NOTHING)
     """
-    INSERT INTO src.grady_safety_plan_mapping
+    INSERT INTO src.safety_plan_mapping
         (field_id, plan_name, step_number, step_label, field_label, data_type, is_repeatable, display_order)
     VALUES
     ('SPI-WS-01','Stanley-Brown Safety Planning Intervention',1,'Warning Signs','Warning sign 1 (thoughts/feelings)','text',true,1),
@@ -854,11 +792,11 @@ _SRC_REFERENCE_DATA: list[str] = [
     ON CONFLICT DO NOTHING
     """,
 
-    # grady_substanceuse — no PK so use insert-if-empty guard
+    # substance_use — no PK so use insert-if-empty guard
     """
     DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM src.grady_substanceuse LIMIT 1) THEN
-        INSERT INTO src.grady_substanceuse (icd_concept_name, icd_code) VALUES
+    IF NOT EXISTS (SELECT 1 FROM src.substance_use LIMIT 1) THEN
+        INSERT INTO src.substance_use (icd_concept_name, icd_code) VALUES
         ('Cannabis dependence with psychotic disorder with delusions','F12.250'),
         ('Cannabis dependence with psychotic disorder with hallucinations','F12.251'),
         ('Cannabis dependence with psychotic disorder, unspecified','F12.259'),
@@ -1174,90 +1112,15 @@ _SRC_REFERENCE_DATA: list[str] = [
     END $$
     """,
 
-    # ZipCodeList — insert if empty (source data has duplicates so guard on empty)
-    r"""
-    DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM src."ZipCodeList" LIMIT 1) THEN
-        INSERT INTO src."ZipCodeList" ("ZipCode","City","County","State") VALUES
-        ('30004','Alpharetta','Fulton County','GA'),('30005','Alpharetta','Fulton County','GA'),
-        ('30009','Alpharetta','Fulton County','GA'),('30022','Alpharetta','Fulton County','GA'),
-        ('30023','Alpharetta','Fulton County','GA'),('30075','Roswell','Fulton County','GA'),
-        ('30076','Roswell','Fulton County','GA'),('30077','Roswell','Fulton County','GA'),
-        ('30097','Duluth','Fulton County','GA'),('30213','Fairburn','Fulton County','GA'),
-        ('30268','Palmetto','Fulton County','GA'),('30272','Red Oak','Fulton County','GA'),
-        ('30291','Union City','Fulton County','GA'),('30301','Atlanta','Fulton County','GA'),
-        ('30302','Atlanta','Fulton County','GA'),('30303','Atlanta','Fulton County','GA'),
-        ('30304','Atlanta','Fulton County','GA'),('30305','Atlanta','Fulton County','GA'),
-        ('30306','Atlanta','Fulton County','GA'),('30307','Atlanta','Fulton County','GA'),
-        ('30308','Atlanta','Fulton County','GA'),('30309','Atlanta','Fulton County','GA'),
-        ('30310','Atlanta','Fulton County','GA'),('30311','Atlanta','Fulton County','GA'),
-        ('30312','Atlanta','Fulton County','GA'),('30313','Atlanta','Fulton County','GA'),
-        ('30314','Atlanta','Fulton County','GA'),('30315','Atlanta','Fulton County','GA'),
-        ('30316','Atlanta','Fulton County','GA'),('30318','Atlanta','Fulton County','GA'),
-        ('30320','Atlanta','Fulton County','GA'),('30321','Atlanta','Fulton County','GA'),
-        ('30324','Atlanta','Fulton County','GA'),('30325','Atlanta','Fulton County','GA'),
-        ('30326','Atlanta','Fulton County','GA'),('30327','Atlanta','Fulton County','GA'),
-        ('30328','Atlanta','Fulton County','GA'),('30328','Sandy Springs','Fulton County','GA'),
-        ('30330','Atlanta','Fulton County','GA'),('30330','Fort Mcpherson','Fulton County','GA'),
-        ('30331','Atlanta','Fulton County','GA'),('30334','Atlanta','Fulton County','GA'),
-        ('30336','Atlanta','Fulton County','GA'),('30337','Atlanta','Fulton County','GA'),
-        ('30337','College Park','Fulton County','GA'),('30339','Atlanta','Fulton County','GA'),
-        ('30342','Atlanta','Fulton County','GA'),('30343','Atlanta','Fulton County','GA'),
-        ('30344','Atlanta','Fulton County','GA'),('30344','East Point','Fulton County','GA'),
-        ('30347','Atlanta','Fulton County','GA'),('30348','Atlanta','Fulton County','GA'),
-        ('30349','Atlanta','Fulton County','GA'),('30349','College Park','Fulton County','GA'),
-        ('30353','Atlanta','Fulton County','GA'),('30354','Atlanta','Fulton County','GA'),
-        ('30354','Hapeville','Fulton County','GA'),('30355','Atlanta','Fulton County','GA'),
-        ('30357','Atlanta','Fulton County','GA'),('30358','Atlanta','Fulton County','GA'),
-        ('30358','Sandy Springs','Fulton County','GA'),('30361','Atlanta','Fulton County','GA'),
-        ('30364','Atlanta','Fulton County','GA'),('30364','East Point','Fulton County','GA'),
-        ('30369','Atlanta','Fulton County','GA'),('30370','Atlanta','Fulton County','GA'),
-        ('30371','Atlanta','Fulton County','GA'),('30374','Atlanta','Fulton County','GA'),
-        ('30376','Atlanta','Fulton County','GA'),('30377','Atlanta','Fulton County','GA'),
-        ('30378','Atlanta','Fulton County','GA'),('30379','Atlanta','Fulton County','GA'),
-        ('30392','Atlanta','Fulton County','GA'),('30394','Atlanta','Fulton County','GA'),
-        ('31106','Atlanta','Fulton County','GA'),('31107','Atlanta','Fulton County','GA'),
-        ('31126','Atlanta','Fulton County','GA'),('31131','Atlanta','Fulton County','GA'),
-        ('31139','Atlanta','Fulton County','GA'),('31150','Atlanta','Fulton County','GA'),
-        ('31156','Atlanta','Fulton County','GA'),
-        ('30002','Avondale Estates','DeKalb County','GA'),('30021','Clarkston','DeKalb County','GA'),
-        ('30030','Decatur','DeKalb County','GA'),('30031','Decatur','DeKalb County','GA'),
-        ('30032','Decatur','DeKalb County','GA'),('30033','Decatur','DeKalb County','GA'),
-        ('30034','Decatur','DeKalb County','GA'),('30035','Decatur','DeKalb County','GA'),
-        ('30036','Decatur','DeKalb County','GA'),('30037','Decatur','DeKalb County','GA'),
-        ('30038','Lithonia','DeKalb County','GA'),('30058','Lithonia','DeKalb County','GA'),
-        ('30072','Pine Lake','DeKalb County','GA'),('30074','Redan','DeKalb County','GA'),
-        ('30079','Scottdale','DeKalb County','GA'),('30083','Stone Mountain','DeKalb County','GA'),
-        ('30084','Tucker','DeKalb County','GA'),('30085','Tucker','DeKalb County','GA'),
-        ('30086','Stone Mountain','DeKalb County','GA'),('30087','Stone Mountain','DeKalb County','GA'),
-        ('30088','Stone Mountain','DeKalb County','GA'),('30294','Ellenwood','DeKalb County','GA'),
-        ('30317','Atlanta','DeKalb County','GA'),('30319','Atlanta','DeKalb County','GA'),
-        ('30329','Atlanta','DeKalb County','GA'),('30333','Atlanta','DeKalb County','GA'),
-        ('30338','Atlanta','DeKalb County','GA'),('30338','Dunwoody','DeKalb County','GA'),
-        ('30340','Atlanta','DeKalb County','GA'),('30340','Doraville','DeKalb County','GA'),
-        ('30341','Atlanta','DeKalb County','GA'),('30341','Chamblee','DeKalb County','GA'),
-        ('30345','Atlanta','DeKalb County','GA'),('30346','Atlanta','DeKalb County','GA'),
-        ('30350','Atlanta','DeKalb County','GA'),('30356','Atlanta','DeKalb County','GA'),
-        ('30359','Atlanta','DeKalb County','GA'),('30360','Atlanta','DeKalb County','GA'),
-        ('30360','Doraville','DeKalb County','GA'),('30362','Atlanta','DeKalb County','GA'),
-        ('30362','Doraville','DeKalb County','GA'),('30366','Atlanta','DeKalb County','GA'),
-        ('30366','Chamblee','DeKalb County','GA'),('31119','Atlanta','DeKalb County','GA'),
-        ('31141','Atlanta','DeKalb County','GA'),('31145','Atlanta','DeKalb County','GA'),
-        ('31146','Atlanta','DeKalb County','GA');
-    END IF;
-    END $$
-    """,
 ]
 
 # RLS for src schema tables (service_role only — pipeline-internal data)
 _SRC_TABLES = [
-    "src.departments_of_interest", "src.grady_departments", "src.grady_encounter",
-    "src.grady_person", "src.allergies", "src.grady_assessment", "src.grady_dla20",
-    "src.grady_cssrs", "src.grady_gad7", "src.grady_pain_assessment", "src.grady_phq9",
-    "src.grady_safety_plan_mapping", "src.grady_crisis_safety_plan", "src.grady_diagnosis",
-    "src.grady_drug", "src.drug_procedure_mapping", "src.inpatient", "src.prescriptions",
-    "src.grady_procedures", "src.grady_providers", "src.grady_substanceuse",
-    'src."ZipCodeList"', "src.grady_treatment_plan",
+    "src.departments_of_interest", "src.departments", "src.encounter",
+    "src.person", "src.dla20", "src.cssrs", "src.gad7", "src.phq9",
+    "src.safety_plan_mapping", "src.crisis_safety_plan", "src.diagnosis",
+    "src.drug", "src.inpatient", "src.prescriptions",
+    "src.procedures", "src.providers", "src.substance_use", "src.treatment_plan",
 ]
 
 
